@@ -462,7 +462,11 @@ pub mod schema {
 }
 
 pub mod insertion {
-    fn insert_item() {}
+    use crate::{sql::database_setup::sql_setup::get_connection, DB_PATH};
+
+    fn insert_item() {
+        let connection = get_connection(DB_PATH);
+    }
 }
 
 pub mod find {}

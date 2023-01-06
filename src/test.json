@@ -1,0 +1,51 @@
+{
+    "id": 7,
+    "created_at": "1670447929000",
+    "updated_at": "1670447929000",
+    "cost": 48000,
+    "model": "QL5",
+    "weight": 48.1,
+    "public_notes": "",
+    "category": "CONSOLE",
+    "notes": null,
+    "dimensions": {
+      "width": 32.6,
+      "length": 22.2,
+      "height": 10.7,
+      "rack_unit": null
+    },
+    "amplifier": null,
+    "console": {
+      "id": 1,
+      "total_outputs": 64,
+      "total_inputs": 64,
+      "total_busses": 16,
+      "physical_inputs": 32,
+      "physical_outputs": 16,
+      "aux_inputs": 0,
+      "physical_aux_inputs": 0,
+      "phantom_power_inputs": 32,
+      "faders": 34,
+      "motorized": true,
+      "midi": "SERIAL",
+      "protocol_inputs": 64,
+      "signal_protocol": "DANTE",
+      "can_expand": true,
+      "max_sample_rate": "SD",
+      "power": {
+        "wattage": 2,
+        "redundant": false,
+        "lower_voltage": 100,
+        "max_wattage": 1.2,
+        "input_connector": "IEC",
+        "output_connector": null
+      }
+    },
+    "computer": null,
+    "processor": null,
+    "network_item": null,
+    "microphone": null,
+    "radio_item": null,
+    "speaker_item": null,
+    "monitoring_item": null
+  }

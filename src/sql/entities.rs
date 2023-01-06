@@ -1,27 +1,29 @@
 pub mod enums {
+    use serde::{Deserialize, Serialize};
 
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::Type, Deserialize, Serialize)]
+    #[repr(i32)]
     pub enum Categories {
-        Console,
-        Processor,
-        Monitoring,
-        Speaker,
-        Amplifier,
-        Computer,
-        Network,
-        Radio,
-        Microphones,
-        SpkHardware,
-        Generic,
+        CONSOLE,
+        PROCESSOR,
+        MONITORING,
+        SPEAKER,
+        AMPLIFIER,
+        COMPUTER,
+        NETWORK,
+        RADIO,
+        MICROPHONES,
+        SPK_HARDWARE,
+        GENERIC,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum MidiType {
         USB,
-        Serial,
+        SERIAL,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum Analog {
         XlrAnalog,
         XlrDigital,
@@ -36,30 +38,31 @@ pub mod enums {
         Dc12v,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum NetworkType {
         Ethernet,
         Wifi,
         Cellular,
     }
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum Protocol {
-        Ethernet,
-        Usb,
-        Midi,
-        Rs232,
-        Rj45,
-        Tcpip,
-        Thunderbolt,
+        DANTE,
+        AES_67,
+        AVB,
+        AVB_MILAN,
+        OPTOCORE,
+        ULTRANET,
+        A_NET,
+        IP,
     }
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum SampleRate {
         SD,
         HD,
         UHD,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum ComputerPortType {
         USB_A,
         USB_B,
@@ -74,7 +77,7 @@ pub mod enums {
         USB_C_THUNDERBOLT,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum TransmitterConnector {
         SHURE_TA4,
         MICRODOT,
@@ -82,7 +85,7 @@ pub mod enums {
         TRI_PIN,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub enum MicrophoneType {
         PRE_POLORAIZED_CONDENSOR,
         CONDENSOR,
@@ -92,10 +95,12 @@ pub mod enums {
 }
 
 pub mod stucts {
+    use serde::{Deserialize, Serialize};
+
     use super::enums::*;
     use super::field_structs::*;
 
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct Item {
         id: i32,
         created_at: String,
@@ -107,7 +112,7 @@ pub mod stucts {
         model: String,
         category: Categories,
         amplifier: Option<AmplifierItem>,
-        console: Option<ConsoleItem>,
+        pub console: Option<ConsoleItem>,
         computer: Option<ComputerItem>,
         processor: Option<ProcessingItem>,
         network_item: Option<NetworkItem>,
@@ -115,11 +120,11 @@ pub mod stucts {
         radio_item: Option<RFItem>,
         speaker_item: Option<SpeakerItem>,
         monitoring_item: Option<MonitoringItem>,
-        notes: Vec<String>,
+        notes: Option<Vec<String>>,
     }
 
-    #[derive(Debug)]
-    struct ConsoleItem {
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+    pub struct ConsoleItem {
         id: i32,
         total_inputs: i32,
         total_outputs: i32,
@@ -139,8 +144,21 @@ pub mod stucts {
         power: Power,
     }
 
-    #[derive(Debug)]
-    struct ComputerItem {
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+    pub struct AmplifierItem {
+        id: i32,
+        total_inputs: i32,
+        total_outputs: i32,
+        midi: MidiType,
+        physical_connectivity: Vec<PhysicalPort>,
+        network_connectivity: Vec<NetworkPort>,
+        signal_protocol: Protocol,
+        max_sample_rate: SampleRate,
+        power: Power,
+    }
+
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+    pub struct ComputerItem {
         id: i32,
         cpu_processor: String,
         ram_size: i32,
@@ -152,14 +170,7 @@ pub mod stucts {
         computer_ports: Vec<ComputerPort>,
         power: Power,
     }
-    #[derive(Debug)]
-    struct ComputerPort {
-        port_type: ComputerPortType,
-        number_of_ports: i32,
-        front_port: bool,
-        version: String,
-    }
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     struct ProcessingItem {
         id: i32,
         total_inputs: i32,
@@ -176,8 +187,8 @@ pub mod stucts {
     }
 
     // Structs
-    #[derive(Debug)]
-    struct NetworkItem {
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+    pub struct NetworkItem {
         id: i32,
         network_type: NetworkType,
         poe_ports: i32,
@@ -186,8 +197,8 @@ pub mod stucts {
         network_connectivity: Vec<NetworkPort>,
         power: Power,
     }
-    #[derive(Debug)]
-    struct MicrophoneItem {
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+    pub struct MicrophoneItem {
         id: i32,
         max_spl: f32,
         phantom: bool,
@@ -199,7 +210,7 @@ pub mod stucts {
         connector: Analog,
         microphone_type: Vec<MicrophoneType>,
     }
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct SpeakerItem {
         id: i32,
         driver: DriverArrangment,
@@ -213,7 +224,7 @@ pub mod stucts {
         physical_connectivity: Vec<PhysicalPort>,
         network_connectivity: Vec<NetworkPort>,
     }
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct MonitoringItem {
         id: i32,
         distro: bool,
@@ -222,7 +233,7 @@ pub mod stucts {
         power: Power,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct RFItem {
         id: i32,
         physical_range: i32,
@@ -235,58 +246,55 @@ pub mod stucts {
 
 pub mod field_structs {
     use super::enums::*;
-
-    #[derive(Debug)]
+    use serde::{Deserialize, Serialize};
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct Dimension {
         width: f32,
         length: f32,
         height: f32,
         rack_unit: Option<f32>,
     }
-    #[derive(Debug)]
-    pub struct AmplifierItem {
-        id: i32,
-        total_inputs: i32,
-        total_outputs: i32,
-        midi: MidiType,
-        physical_connectivity: Vec<PhysicalPort>,
-        network_connectivity: Vec<NetworkPort>,
-        signal_protocol: Protocol,
-        max_sample_rate: SampleRate,
-        power: Power,
-    }
-    #[derive(Debug)]
+
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct PhysicalPort {
         port_identifier: String,
         connector_type: Analog,
         signal_lines: i32,
         input: bool,
     }
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct NetworkPort {
         port_identifier: String,
         port_type: NetworkType,
         input: bool,
     }
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct Power {
         voltage: Option<f32>,
         current: Option<f32>,
         frequency: Option<f32>,
     }
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct Transmitter {
         connector: TransmitterConnector,
     }
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct Reciever {
         network_ports: Vec<NetworkPort>,
         physical_ports: Vec<PhysicalPort>,
         power: Power,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
     pub struct DriverArrangment {
         speaker_size: f32,
+    }
+
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+    pub struct ComputerPort {
+        port_type: ComputerPortType,
+        number_of_ports: i32,
+        front_port: bool,
+        version: String,
     }
 }
