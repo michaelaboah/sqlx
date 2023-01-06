@@ -462,10 +462,21 @@ pub mod schema {
 }
 
 pub mod insertion {
-    use crate::{sql::database_setup::sql_setup::get_connection, DB_PATH};
+    use serde::de::value::Error;
 
-    fn insert_item() {
-        let connection = get_connection(DB_PATH);
+    use crate::{
+        sql::{database_setup::sql_setup::get_connection, entities::structs::Item},
+        DB_PATH,
+    };
+
+    pub async fn insert_item(insert: &mut Item) -> Result<(), Error> {
+        let mut connection = get_connection(DB_PATH)
+            .await
+            .expect("insert_item: Connection failed");
+
+        sqlx::query("INSERT INTO item (created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id, console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id, notes)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)").execute(&mut connection).await.unwrap();
+        Ok(())
     }
 }
 

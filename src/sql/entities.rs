@@ -94,13 +94,13 @@ pub mod enums {
     }
 }
 
-pub mod stucts {
+pub mod structs {
     use serde::{Deserialize, Serialize};
 
     use super::enums::*;
     use super::field_structs::*;
 
-    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize)]
+    #[derive(Debug, sqlx::FromRow, Serialize, Deserialize, sqlx::Type, sqlx::Encode)]
     pub struct Item {
         id: i32,
         created_at: String,
@@ -296,5 +296,42 @@ pub mod field_structs {
         number_of_ports: i32,
         front_port: bool,
         version: String,
+    }
+}
+
+pub mod struct_parsing {
+    use serde::Deserialize;
+
+    pub fn parse_item<T>(json_string: &str) -> Result<T, serde_json::Error>
+    where
+        T: for<'a> Deserialize<'a>,
+    {
+        serde_json::from_str(json_string)
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use serde::Deserialize;
+
+        #[derive(Debug, Deserialize, PartialEq)]
+        struct Person {
+            name: String,
+            age: u32,
+        }
+
+        #[test]
+        fn test_parse_item() {
+            let json_string = r#"{"name": "John", "age": 30}"#;
+            let expected = Person {
+                name: "John".to_string(),
+                age: 30,
+            };
+
+            let result = parse_item::<Person>(json_string);
+            assert!(result.is_ok());
+            let person = result.unwrap();
+            assert_eq!(person, expected);
+        }
     }
 }

@@ -1,4 +1,7 @@
-use sql::{database_setup::sql_setup::initialize_db, entities::stucts::Item};
+use sql::{
+    database_setup::sql_setup::initialize_db,
+    entities::{struct_parsing::parse_item, structs::Item},
+};
 use std::fs;
 mod sql;
 
@@ -11,13 +14,8 @@ fn main() {
     // };
 
     let yamaha = fs::read_to_string("src/test.json").unwrap();
-    let converted: Option<Item> = match serde_json::from_str(yamaha.as_str()) {
-        Ok(con) => Some(con),
-        Err(err) => {
-            println!("{err}");
-            None
-        }
-    };
-    let new = converted.unwrap();
-    println!("{:#?}", new.console.unwrap())
+
+    let test = parse_item::<Item>(yamaha.as_str());
+
+    println!("{:#?}", test.unwrap())
 }
