@@ -32,12 +32,12 @@ pub mod schema {
 
     const ITEM_TABLE: &str = "CREATE TABLE IF NOT EXISTS item (
         id integer NOT NULL PRIMARY KEY autoincrement,
-        created_at datetime NOT NULL DEFAULT 'NOW()',
-        updated_at datetime NOT NULL,
+        created_at TEXT NOT NULL DEFAULT 'NOW()',
+        updated_at TEXT NOT NULL,
         public_notes text NULL,
         cost DOUBLE NULL,
         weight DOUBLE NULL,
-        dimensions JSON NULL,
+        dimensions TEXT NULL,
         model text UNIQUE NOT NULL,
         category integer NOT NULL,
         amplifier_item_id integer NULL,
@@ -50,18 +50,18 @@ pub mod schema {
         speaker_item_id integer NULL,
         monitoring_item_id integer NULL,
         searchable_model text NULL,
-        notes JSON NULL,
-        CONSTRAINT item_amplifier_id_foreign FOREIGN key(amplifier_item_id) REFERENCES amplifier_item(id) ON DELETE
+        notes TEXT NULL,
+        CONSTRAINT item_amplifier_item_id_foreign FOREIGN key(amplifier_item_id) REFERENCES amplifier_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_console_id_foreign FOREIGN key(console_item_id) REFERENCES console_item(id) ON DELETE
+            CONSTRAINT item_console_item_id_foreign FOREIGN key(console_item_id) REFERENCES console_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_computer_id_foreign FOREIGN key(computer_item_id) REFERENCES computer_item(id) ON DELETE
+            CONSTRAINT item_computer_item_id_foreign FOREIGN key(computer_item_id) REFERENCES computer_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_processor_id_foreign FOREIGN key(processor_item_id) REFERENCES processor_item(id) ON DELETE
+            CONSTRAINT item_processor_item_id_foreign FOREIGN key(processor_item_id) REFERENCES processor_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
             CONSTRAINT item_network_item_id_foreign FOREIGN key(network_item_id) REFERENCES network_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_microphone_id_foreign FOREIGN key(microphone_item_id) REFERENCES microphone_item(id) ON DELETE
+            CONSTRAINT item_microphone_item_id_foreign FOREIGN key(microphone_item_id) REFERENCES microphone_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
             CONSTRAINT item_radio_item_id_foreign FOREIGN key(radio_item_id) REFERENCES rfitem(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
@@ -77,8 +77,8 @@ pub mod schema {
                 total_inputs integer NOT NULL,
                 total_outputs integer NOT NULL,
                 midi integer NOT NULL,
-                physical_connectivity JSON NULL,
-                network_connectivity JSON NULL,
+                physical_connectivity TEXT NULL,
+                network_connectivity TEXT NULL,
                 signal_protocol integer NOT NULL,
                 max_sample_rate text CHECK (
                     max_sample_rate in (
@@ -87,7 +87,7 @@ pub mod schema {
                         'UHD'
                     )
                 ) NOT NULL,
-                power JSON NULL
+                power TEXT NULL
             );";
     const COMPUTER_ITEM_TABLE: &str = "CREATE TABLE IF NOT EXISTS computer_item (
         id integer NOT NULL PRIMARY KEY autoincrement,
@@ -97,9 +97,9 @@ pub mod schema {
         model_year text NULL,
         operating_system text NULL,
         dedicated_graphics integer NOT NULL,
-        network_connectivity JSON NULL,
-        computer_ports JSON NULL,
-        power JSON NULL
+        network_connectivity TEXT NULL,
+        computer_ports TEXT NULL,
+        power TEXT NULL
       );";
 
     const CONSOLE_ITEM_TABLE: &str = "CREATE TABLE IF NOT EXISTS console_item (
@@ -125,7 +125,7 @@ pub mod schema {
                     'UHD'
                 )
             ) NOT NULL,
-            power JSON NULL
+            power TEXT NULL
         );";
 
     const MICROPHONE_ITEM_TABLE: &str = "CREATE TABLE IF NOT EXISTS microphone_item (
@@ -144,9 +144,9 @@ pub mod schema {
     const MONITORING_ITEM: &str = "CREATE TABLE IF NOT EXISTS monitoring_item (
             id integer NOT NULL PRIMARY KEY autoincrement,
             distro integer NULL,
-            network_connectivity JSON NULL,
-            physical_connectivity JSON NULL,
-            power JSON NULL
+            network_connectivity TEXT NULL,
+            physical_connectivity TEXT NULL,
+            power TEXT NULL
         );";
 
     const NETWORK_ITEM: &str = "CREATE TABLE IF NOT EXISTS network_item (
@@ -155,8 +155,8 @@ pub mod schema {
             poe_ports integer NOT NULL,
             max_speed integer NOT NULL,
             fiber integer NULL,
-            network_connectivity JSON NULL,
-            power JSON NULL
+            network_connectivity TEXT NULL,
+            power TEXT NULL
         );";
 
     const PROCESSING_ITEM_TABLE: &str = "CREATE TABLE IF NOT EXISTS processor_item (
@@ -175,9 +175,9 @@ pub mod schema {
                 'UHD'
             )
         ) NOT NULL,
-        network_connectivity JSON NULL,
-        physical_connectivity JSON NULL,
-        power JSON NULL
+        network_connectivity TEXT NULL,
+        physical_connectivity TEXT NULL,
+        power TEXT NULL
         );";
 
     const RADIO_ITEM: &str = "CREATE TABLE IF NOT EXISTS rfitem (
@@ -185,21 +185,21 @@ pub mod schema {
             physical_range integer NOT NULL,
             lower_frequency_response integer NOT NULL,
             upper_frequency_response integer NOT NULL,
-            transmitter JSON NULL,
-            reciever JSON NULL
+            transmitter TEXT NULL,
+            reciever TEXT NULL
         );";
     const SPEAKER_ITEM: &str = "CREATE TABLE IF NOT EXISTS speaker_item (
             id integer NOT NULL PRIMARY KEY autoincrement,
-            driver JSON NOT NULL,
+            driver TEXT NOT NULL,
             built_in_processing integer NOT NULL,
             wireless integer NOT NULL,
             max_spl integer NOT NULL,
-            power JSON NOT NULL,
+            power TEXT NOT NULL,
             lower_frequency_response integer NOT NULL,
             upper_frequency_response integer NOT NULL,
             mounting_options text NOT NULL,
-            physical_connectivity JSON NULL,
-            network_connectivity JSON NULL
+            physical_connectivity TEXT NULL,
+            network_connectivity TEXT NULL
         );";
 
     const RFBAND: &str = "CREATE TABLE IF NOT EXISTS rfband (
@@ -462,20 +462,299 @@ pub mod schema {
 }
 
 pub mod insertion {
+    use crate::sql::{
+        database_setup::sql_setup::get_connection,
+        entities::{creation_structs::CreateItem, enums::Categories, structs::Item},
+    };
     use serde::de::value::Error;
 
-    use crate::{
-        sql::{database_setup::sql_setup::get_connection, entities::structs::Item},
-        DB_PATH,
-    };
+    const ITEM_INSERT: &str = "INSERT INTO item (created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
+        console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,  
+         notes)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)";
+    const AMPLIFIER_INSERT: &str = "INSERT INTO amplifier_item (id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);";
+    const CONSOLE_INSERT: &str = "INSERT INTO console_item (
+        id, total_inputs, total_outputs, total_busses, physical_inputs, physical_outputs, aux_inputs, physical_aux_inputs, phantom_power_inputs, faders, motorized, midi, protocol_inputs, signal_protocol, can_expand, max_sample_rate, power)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17);";
+    const COMPUTER_INSERT: &str = "INSERT INTO computer_item (id, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);";
+    const NETWORK_INSERT: &str = "INSERT INTO network_item (id, network_type, poe_ports, max_speed, fiber, network_connectivity, power)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
+    const PROCESSOR_ITEM: &str = "INSERT INTO processor_item (id, total_inputs, total_outputs, physical_inputs, physical_outputs, midi, protocol_inputs, signal_protocol, max_sample_rate, network_connectivity, physical_connectivity, power)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12);";
+    const MONITORING_INSERT: &str = "INSERT INTO monitoring_item (id, distro, network_connectivity, physical_connectivity, power)
+        VALUES (?1, ?2, ?3, ?4, ?5);";
+    const MICROPHONE_INSERT: &str = "INSERT INTO microphone_item (id, max_spl, phantom, low_cut, pad, diaphragm_size, output_impedance, frequency_response, connector, microphone_type)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);";
+    const SPEAKER_INSERT: &str = "INSERT INTO speaker_item (id, driver, built_in_processing, wireless, max_spl, power, lower_frequency_response, upper_frequency_response, mounting_options, physical_connectivity, network_connectivity)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11);";
+    const RF_INSERT: &str = "INSERT INTO rfitem (id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
 
-    pub async fn insert_item(insert: &mut Item) -> Result<(), Error> {
-        let mut connection = get_connection(DB_PATH)
+    pub async fn insert_item(insert: &Item, connection_path: &str) -> Result<(), Error> {
+        let mut connection = get_connection(connection_path)
             .await
             .expect("insert_item: Connection failed");
 
-        sqlx::query("INSERT INTO item (created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id, console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id, notes)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)").execute(&mut connection).await.unwrap();
+        match &insert.category {
+            Categories::GENERIC => (),
+            Categories::AMPLIFIER => match &insert.amplifier {
+                Some(amplifier) => {
+                    let power_bind =
+                        serde_json::to_value(amplifier.power.to_owned()).unwrap_or_default();
+                    let net_conn_bind =
+                        serde_json::to_value(amplifier.network_connectivity.to_owned())
+                            .unwrap_or_default();
+                    let phys_conn_bind =
+                        serde_json::to_value(amplifier.physical_connectivity.to_owned())
+                            .unwrap_or_default();
+
+                    sqlx::query(AMPLIFIER_INSERT)
+                        .bind(amplifier.id)
+                        .bind(amplifier.total_inputs)
+                        .bind(amplifier.total_outputs)
+                        .bind(amplifier.midi)
+                        .bind(phys_conn_bind)
+                        .bind(net_conn_bind)
+                        .bind(amplifier.signal_protocol)
+                        .bind(amplifier.max_sample_rate)
+                        .bind(power_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+            Categories::CONSOLE => match &insert.console {
+                Some(console) => {
+                    let power_bind =
+                        serde_json::to_value(console.power.to_owned()).unwrap_or_default();
+                    match sqlx::query(CONSOLE_INSERT)
+                        .bind(console.id)
+                        .bind(console.total_inputs)
+                        .bind(console.total_outputs)
+                        .bind(console.total_busses)
+                        .bind(console.physical_inputs)
+                        .bind(console.physical_outputs)
+                        .bind(console.aux_inputs)
+                        .bind(console.physical_aux_inputs)
+                        .bind(console.phantom_power_inputs)
+                        .bind(console.faders)
+                        .bind(console.motorized)
+                        .bind(console.midi)
+                        .bind(console.protocol_inputs)
+                        .bind(console.signal_protocol)
+                        .bind(console.can_expand)
+                        .bind(console.max_sample_rate)
+                        // .bind(power_bind)
+                        .execute(&mut connection)
+                        .await
+                    {
+                        Ok(_) => (),
+                        Err(err) => println!("{err}"),
+                    }
+                }
+                None => (),
+            },
+            Categories::COMPUTER => match &insert.computer {
+                Some(computer) => {
+                    let power_bind =
+                        serde_json::to_value(computer.power.to_owned()).unwrap_or_default();
+                    let net_conn = serde_json::to_value(computer.network_connectivity.to_owned())
+                        .unwrap_or_default();
+                    sqlx::query(COMPUTER_INSERT)
+                        .bind(computer.id)
+                        .bind(computer.cpu_processor.to_owned())
+                        .bind(computer.ram_size)
+                        .bind(computer.total_storage)
+                        .bind(computer.model_year.to_owned())
+                        .bind(computer.operating_system.to_owned())
+                        .bind(computer.dedicated_graphics)
+                        .bind(net_conn)
+                        .bind(
+                            serde_json::to_value(computer.computer_ports.to_owned())
+                                .unwrap_or_default(),
+                        )
+                        .bind(power_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+            Categories::PROCESSOR => match &insert.processor {
+                Some(processor) => {
+                    let power_bind =
+                        serde_json::to_value(processor.power.to_owned()).unwrap_or_default();
+                    let net_conn_bind =
+                        serde_json::to_value(processor.network_connectivity.to_owned())
+                            .unwrap_or_default();
+                    let phys_conn_bind =
+                        serde_json::to_value(processor.physical_connectivity.to_owned())
+                            .unwrap_or_default();
+                    sqlx::query(PROCESSOR_ITEM)
+                        .bind(processor.id)
+                        .bind(processor.total_inputs)
+                        .bind(processor.total_outputs)
+                        .bind(processor.physical_inputs)
+                        .bind(processor.physical_outputs)
+                        .bind(processor.midi)
+                        .bind(processor.protocol_inputs)
+                        .bind(processor.signal_protocol)
+                        .bind(processor.max_sample_rate)
+                        .bind(net_conn_bind)
+                        .bind(phys_conn_bind)
+                        .bind(power_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+            Categories::MONITORING => match &insert.monitoring_item {
+                Some(monitor) => {
+                    let power_bind =
+                        serde_json::to_value(monitor.power.to_owned()).unwrap_or_default();
+                    let net_conn_bind =
+                        serde_json::to_value(monitor.network_connectivity.to_owned())
+                            .unwrap_or_default();
+                    let phys_conn_bind =
+                        serde_json::to_value(monitor.physical_connectivity.to_owned())
+                            .unwrap_or_default();
+                    sqlx::query(MONITORING_INSERT)
+                        .bind(monitor.id)
+                        .bind(monitor.distro)
+                        .bind(net_conn_bind)
+                        .bind(phys_conn_bind)
+                        .bind(power_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+            Categories::SPEAKER => match &insert.speaker_item {
+                Some(speaker) => {
+                    let power_bind =
+                        serde_json::to_value(speaker.power.to_owned()).unwrap_or_default();
+                    let net_conn_bind =
+                        serde_json::to_value(speaker.network_connectivity.to_owned())
+                            .unwrap_or_default();
+                    let phys_conn_bind =
+                        serde_json::to_value(speaker.physical_connectivity.to_owned())
+                            .unwrap_or_default();
+                    sqlx::query(SPEAKER_INSERT)
+                        .bind(speaker.id)
+                        .bind(serde_json::to_value(speaker.driver.to_owned()).unwrap_or_default())
+                        .bind(speaker.built_in_processing)
+                        .bind(speaker.wireless)
+                        .bind(speaker.max_spl)
+                        .bind(power_bind)
+                        .bind(speaker.lower_frequency_response)
+                        .bind(speaker.upper_frequency_response)
+                        .bind(
+                            serde_json::to_value(speaker.mounting_options.to_owned())
+                                .unwrap_or_default(),
+                        )
+                        .bind(phys_conn_bind)
+                        .bind(net_conn_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+            // Categories::SPK_HARDWARE => match &insert.spk_hardware {},
+            Categories::NETWORK => match &insert.network_item {
+                Some(net) => {
+                    let power_bind = serde_json::to_value(net.power.to_owned()).unwrap_or_default();
+                    let net_conn_bind = serde_json::to_value(net.network_connectivity.to_owned())
+                        .unwrap_or_default();
+                    sqlx::query(NETWORK_INSERT)
+                        .bind(net.id)
+                        .bind(net.network_type)
+                        .bind(net.poe_ports)
+                        .bind(net.max_speed)
+                        .bind(net.fiber)
+                        .bind(net_conn_bind)
+                        .bind(power_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+            Categories::RADIO => match &insert.radio_item {
+                Some(radio) => {
+                    let transmitter_bind =
+                        serde_json::to_value(radio.transmitter.to_owned()).unwrap_or_default();
+                    let reciver_bind =
+                        serde_json::to_value(radio.reciever.to_owned()).unwrap_or_default();
+                    sqlx::query(RF_INSERT)
+                        .bind(radio.id)
+                        .bind(radio.physical_range)
+                        .bind(radio.lower_frequency_response)
+                        .bind(radio.upper_frequency_response)
+                        .bind(transmitter_bind)
+                        .bind(reciver_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+            Categories::MICROPHONES => match &insert.microphone {
+                Some(ref microphone) => {
+                    let mic_type_bind = serde_json::to_value(microphone.microphone_type.to_owned())
+                        .unwrap_or_default();
+                    sqlx::query(MICROPHONE_INSERT)
+                        .bind(microphone.id)
+                        .bind(microphone.max_spl)
+                        .bind(microphone.phantom)
+                        .bind(microphone.low_cut)
+                        .bind(microphone.pad)
+                        .bind(microphone.diaphragm_size)
+                        .bind(microphone.output_impedance)
+                        .bind(microphone.frequency_response.to_owned())
+                        .bind(microphone.connector)
+                        .bind(mic_type_bind)
+                        .execute(&mut connection)
+                        .await
+                        .unwrap();
+                }
+                None => (),
+            },
+        }
+
+        // let test =
+        let table = CreateItem::new(&insert);
+        match sqlx::query(ITEM_INSERT)
+            .bind(table.created_at)
+            .bind(table.updated_at)
+            .bind(table.public_notes)
+            .bind(table.cost)
+            .bind(table.weight)
+            .bind(table.dimensions)
+            .bind(table.model)
+            .bind(table.category)
+            .bind(table.amplifier_item_id)
+            .bind(table.console_item_id)
+            .bind(table.computer_item_id)
+            .bind(table.processor_item_id)
+            .bind(table.network_item_id)
+            .bind(table.microphone_item_id)
+            .bind(table.radio_item_id)
+            .bind(table.speaker_item_id)
+            .bind(table.monitoring_item_id)
+            .bind(table.notes)
+            .execute(&mut connection)
+            .await
+        {
+            Ok(res) => println!("{:#?}", res),
+            Err(error) => println!("{error}"),
+        }
+
         Ok(())
     }
 }

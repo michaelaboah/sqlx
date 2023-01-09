@@ -1,0 +1,14 @@
+(1) no such table: item in "drop table item;"
+(1) no such table: item in "drop table item;"
+(1) no such table: item in "select console_item_id from item;"
+(1) no such table: item in "select console_item_id from item;"
+(1) near "console_item": syntax error in "drop console_item
+drop console_item;"
+(17) statement aborts at 29: [select * from item;] database schema has changed
+(1) no such table: console_item in "select * from console_item;"
+(1) invalid arguments to fts4aux constructor in "PRAGMA "main".table_info='fts4aux';"
+(21) API called with NULL prepared statement
+(21) misuse at line 92342 of [9ff244ce07]
+(1) invalid arguments to fts4aux constructor in "PRAGMA "main".table_info='fts4aux';"
+(21) API called with NULL prepared statement
+(21) misuse at line 92342 of [9ff244ce07]

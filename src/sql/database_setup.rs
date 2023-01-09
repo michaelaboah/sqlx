@@ -1,23 +1,31 @@
 pub mod sql_setup {
 
-    use sqlx::{
-        sqlite::{self, SqliteRow},
-        Connection, Row, SqliteConnection,
+    use std::fs;
+
+    // use futures::TyStreamExt;
+    use crate::sql::{
+        entities::structs::Item,
+        queries::{
+            insertion::insert_item,
+            schema::{ITEM_RELATIONSHIPS, PRAGMA_QUERIES, TABLE_QUERIES},
+        },
     };
-    use tokio;
+    use sqlx::{
+        sqlite::{self},
+        Connection, SqliteConnection,
+    };
 
-    use crate::sql::queries::schema::{ITEM_RELATIONSHIPS, PRAGMA_QUERIES, TABLE_QUERIES};
-
-    #[derive(Debug, sqlx::FromRow)]
-    struct User {
-        id: i32,
-        name: String,
-        email: String,
-    }
+    // #[derive(Debug, sqlx::FromRow)]
+    // struct User {
+    //     id: i32,
+    //     name: String,
+    //     email: String,
+    // }
 
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        // dotenv().expect("init err");
         let mut conn = get_connection(path).await.expect("Problem with pool");
         //Create tables
         for table in TABLE_QUERIES.iter() {
@@ -33,10 +41,14 @@ pub mod sql_setup {
         for routine in PRAGMA_QUERIES.iter() {
             sqlx::query(&routine).execute(&mut conn).await?;
         }
-
-        // let fetch_users = sqlx::query_as::<_, User>("SELECT * FROM user");
-        // let res: Vec<User> = fetch_users.fetch_all(&mut conn).await?;
-        // println!("{:#?}", res);
+        // let json_string = fs::read_to_string("src/test.json").expect("Err with file read");
+        // let console_item: Item = serde_json::from_str(&json_string).expect("Err with parse");
+        // insert_item(&console_item, path).await?;
+        let fetch_users = sqlx::query_as!(Item, "SELECT * FROM item",)
+            .fetch_all(&mut conn)
+            .await?;
+        // let res = fetch_users.
+        println!("{:#?}", fetch_users);
         Ok(())
     }
 

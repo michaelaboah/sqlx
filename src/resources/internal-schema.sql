@@ -14,12 +14,12 @@ ON;
 PRAGMA integrity_check;
 CREATE TABLE IF NOT EXISTS item (
     id integer NOT NULL PRIMARY KEY autoincrement,
-    created_at datetime NOT NULL DEFAULT 'NOW()',
-    updated_at datetime NOT NULL,
+    created_at TEXT NOT NULL DEFAULT 'NOW()',
+    updated_at TEXT NOT NULL,
     public_notes text NULL,
     cost DOUBLE NULL,
     weight DOUBLE NULL,
-    dimensions JSON NULL,
+    dimensions TEXT NULL,
     model text UNIQUE NOT NULL,
     category integer NOT NULL,
     amplifier_item_id integer NULL,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS item (
     speaker_item_id integer NULL,
     monitoring_item_id integer NULL,
     searchable_model text NULL,
-    notes JSON NULL,
+    notes TEXT NULL,
     CONSTRAINT item_amplifier_id_foreign FOREIGN key(amplifier_item_id) REFERENCES amplifier_item(id) ON DELETE
     SET NULL ON UPDATE CASCADE,
         CONSTRAINT item_console_id_foreign FOREIGN key(console_item_id) REFERENCES console_item(id) ON DELETE
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS amplifier_item (
     total_inputs integer NOT NULL,
     total_outputs integer NOT NULL,
     midi integer NOT NULL,
-    physical_connectivity JSON NULL,
-    network_connectivity JSON NULL,
+    physical_connectivity TEXT NULL,
+    network_connectivity TEXT NULL,
     signal_protocol integer NOT NULL,
     max_sample_rate text CHECK (
         max_sample_rate in (
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS amplifier_item (
             'UHD'
         )
     ) NOT NULL,
-    power JSON NULL
+    power TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS computer_item (
     id integer NOT NULL PRIMARY KEY autoincrement,
@@ -77,9 +77,9 @@ CREATE TABLE IF NOT EXISTS computer_item (
     model_year text NULL,
     operating_system text NULL,
     dedicated_graphics integer NOT NULL,
-    network_connectivity JSON NULL,
-    computer_ports JSON NULL,
-    power JSON NULL
+    network_connectivity TEXT NULL,
+    computer_ports TEXT NULL,
+    power TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS console_item (
     id integer NOT NULL PRIMARY KEY autoincrement,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS console_item (
             'UHD'
         )
     ) NOT NULL,
-    power JSON NULL
+    power TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS microphone_item (
     id integer NOT NULL PRIMARY KEY autoincrement,
@@ -121,9 +121,9 @@ CREATE TABLE IF NOT EXISTS microphone_item (
 CREATE TABLE IF NOT EXISTS monitoring_item (
     id integer NOT NULL PRIMARY KEY autoincrement,
     distro integer NULL,
-    network_connectivity JSON NULL,
-    physical_connectivity JSON NULL,
-    power JSON NULL
+    network_connectivity TEXT NULL,
+    physical_connectivity TEXT NULL,
+    power TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS network_item (
     id integer NOT NULL PRIMARY KEY autoincrement,
@@ -131,8 +131,8 @@ CREATE TABLE IF NOT EXISTS network_item (
     poe_ports integer NOT NULL,
     max_speed integer NOT NULL,
     fiber integer NULL,
-    network_connectivity JSON NULL,
-    power JSON NULL
+    network_connectivity TEXT NULL,
+    power TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS processor_item (
     id integer NOT NULL PRIMARY KEY autoincrement,
@@ -150,30 +150,30 @@ CREATE TABLE IF NOT EXISTS processor_item (
             'UHD'
         )
     ) NOT NULL,
-    network_connectivity JSON NULL,
-    physical_connectivity JSON NULL,
-    power JSON NULL
+    network_connectivity TEXT NULL,
+    physical_connectivity TEXT NULL,
+    power TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS rfitem (
     id integer NOT NULL PRIMARY KEY autoincrement,
     physical_range integer NOT NULL,
     lower_frequency_response integer NOT NULL,
     upper_frequency_response integer NOT NULL,
-    transmitter JSON NULL,
-    reciever JSON NULL
+    transmitter TEXT NULL,
+    reciever TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS speaker_item (
     id integer NOT NULL PRIMARY KEY autoincrement,
-    driver JSON NOT NULL,
+    driver TEXT NOT NULL,
     built_in_processing integer NOT NULL,
     wireless integer NOT NULL,
     max_spl integer NOT NULL,
-    power JSON NOT NULL,
+    power TEXT NOT NULL,
     lower_frequency_response integer NOT NULL,
     upper_frequency_response integer NOT NULL,
     mounting_options text NOT NULL,
-    physical_connectivity JSON NULL,
-    network_connectivity JSON NULL
+    physical_connectivity TEXT NULL,
+    network_connectivity TEXT NULL
 );
 CREATE TABLE IF NOT EXISTS rfband (
     id integer NOT NULL PRIMARY KEY autoincrement,

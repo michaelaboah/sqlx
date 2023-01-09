@@ -1,21 +1,17 @@
-use sql::{
-    database_setup::sql_setup::initialize_db,
-    entities::{struct_parsing::parse_item, structs::Item},
-};
-use std::fs;
+use sql::database_setup::sql_setup::initialize_db;
 mod sql;
+use dotenvy::dotenv;
+use std::env;
 
-const DB_PATH: &str = "src/resources/sqlite-internal.db";
+// const DB_PATH: &str = "src/resources/sqlite-internal.db";
 
 fn main() {
-    // match initialize_db(DB_PATH) {
-    //     Ok(_) => (),
-    //     Err(err) => println!("Error: {}", err),
-    // };
+    dotenv().expect(".env file not found");
 
-    let yamaha = fs::read_to_string("src/test.json").unwrap();
-
-    let test = parse_item::<Item>(yamaha.as_str());
-
-    println!("{:#?}", test.unwrap())
+    let db_path = env::var("DATABASE_URL").unwrap();
+    match initialize_db(&db_path) {
+        Ok(_) => (),
+        Err(err) => println!("Error: {}", err),
+    };
+    println!("{}", &db_path);
 }
