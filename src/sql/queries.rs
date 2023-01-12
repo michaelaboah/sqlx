@@ -35,8 +35,8 @@ pub mod schema {
         created_at TEXT NOT NULL DEFAULT 'NOW()',
         updated_at TEXT NOT NULL,
         public_notes text NULL,
-        cost DOUBLE NULL,
-        weight DOUBLE NULL,
+        cost DOUBLE NOT NULL,
+        weight DOUBLE NOT NULL,
         dimensions TEXT NULL,
         model text UNIQUE NOT NULL,
         category integer NOT NULL,
@@ -51,17 +51,17 @@ pub mod schema {
         monitoring_item_id integer NULL,
         searchable_model text NULL,
         notes TEXT NULL,
-        CONSTRAINT item_amplifier_item_id_foreign FOREIGN key(amplifier_item_id) REFERENCES amplifier_item(id) ON DELETE
+        CONSTRAINT item_amplifier_id_foreign FOREIGN key(amplifier_item_id) REFERENCES amplifier_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_console_item_id_foreign FOREIGN key(console_item_id) REFERENCES console_item(id) ON DELETE
+            CONSTRAINT item_console_id_foreign FOREIGN key(console_item_id) REFERENCES console_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_computer_item_id_foreign FOREIGN key(computer_item_id) REFERENCES computer_item(id) ON DELETE
+            CONSTRAINT item_computer_id_foreign FOREIGN key(computer_item_id) REFERENCES computer_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_processor_item_id_foreign FOREIGN key(processor_item_id) REFERENCES processor_item(id) ON DELETE
+            CONSTRAINT item_processor_id_foreign FOREIGN key(processor_item_id) REFERENCES processor_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
             CONSTRAINT item_network_item_id_foreign FOREIGN key(network_item_id) REFERENCES network_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
-            CONSTRAINT item_microphone_item_id_foreign FOREIGN key(microphone_item_id) REFERENCES microphone_item(id) ON DELETE
+            CONSTRAINT item_microphone_id_foreign FOREIGN key(microphone_item_id) REFERENCES microphone_item(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
             CONSTRAINT item_radio_item_id_foreign FOREIGN key(radio_item_id) REFERENCES rfitem(id) ON DELETE
         SET NULL ON UPDATE CASCADE,
@@ -468,10 +468,10 @@ pub mod insertion {
     };
     use serde::de::value::Error;
 
-    const ITEM_INSERT: &str = "INSERT INTO item (created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
+    const ITEM_INSERT: &str = "INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
         console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,  
          notes)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)";
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)";
     const AMPLIFIER_INSERT: &str = "INSERT INTO amplifier_item (id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);";
     const CONSOLE_INSERT: &str = "INSERT INTO console_item (
@@ -729,25 +729,48 @@ pub mod insertion {
 
         // let test =
         let table = CreateItem::new(&insert);
-        match sqlx::query(ITEM_INSERT)
-            .bind(table.created_at)
-            .bind(table.updated_at)
-            .bind(table.public_notes)
-            .bind(table.cost)
-            .bind(table.weight)
-            .bind(table.dimensions)
-            .bind(table.model)
-            .bind(table.category)
-            .bind(table.amplifier_item_id)
-            .bind(table.console_item_id)
-            .bind(table.computer_item_id)
-            .bind(table.processor_item_id)
-            .bind(table.network_item_id)
-            .bind(table.microphone_item_id)
-            .bind(table.radio_item_id)
-            .bind(table.speaker_item_id)
-            .bind(table.monitoring_item_id)
-            .bind(table.notes)
+        match sqlx::query!("INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
+            console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,
+             notes)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)",
+            table.id,
+            table.created_at,
+            table.updated_at,
+            table.public_notes,
+            table.cost,
+            table.weight,
+            table.dimensions,
+            table.model,
+            table.category,
+            table.amplifier_item_id,
+            table.console_item_id,
+            table.computer_item_id,
+            table.processor_item_id,
+            table.network_item_id,
+            table.microphone_item_id,
+            table.radio_item_id,
+            table.speaker_item_id,
+            table.monitoring_item_id,
+            table.notes)
+            // .bind(table.id)
+            // .bind(table.created_at)
+            // .bind(table.updated_at)
+            // .bind(table.public_notes)
+            // .bind(table.cost)
+            // .bind(table.weight)
+            // .bind(table.dimensions)
+            // .bind(table.model)
+            // .bind(table.category)
+            // .bind(table.amplifier_item_id)
+            // .bind(table.console_item_id)
+            // .bind(table.computer_item_id)
+            // .bind(table.processor_item_id)
+            // .bind(table.network_item_id)
+            // .bind(table.microphone_item_id)
+            // .bind(table.radio_item_id)
+            // .bind(table.speaker_item_id)
+            // .bind(table.monitoring_item_id)
+            // .bind(table.notes)
             .execute(&mut connection)
             .await
         {
