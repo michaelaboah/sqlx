@@ -1,7 +1,5 @@
 pub mod sql_setup {
 
-    use std::fs;
-
     // use futures::TyStreamExt;
     use crate::sql::{
         entities::{creation_structs::CreateItem, enums::Categories, structs::Item},
@@ -12,33 +10,8 @@ pub mod sql_setup {
     };
     use sqlx::{
         sqlite::{self},
-        Connection, FromRow, SqliteConnection,
+        Connection, SqliteConnection,
     };
-
-    #[derive(Debug, Default, sqlx::FromRow, PartialEq)]
-    pub struct TestItem {
-        pub id: i64,
-        pub created_at: String,
-        pub updated_at: String,
-        pub public_notes: Option<String>,
-        pub cost: f64,
-        pub weight: f64,
-        pub dimensions: Option<String>,
-        pub model: String,
-        pub category: i64,
-        pub amplifier_item_id: Option<i64>,
-        pub console_item_id: Option<i64>,
-        pub computer_item_id: Option<i64>,
-        pub processor_item_id: Option<i64>,
-        pub network_item_id: Option<i64>,
-        pub microphone_item_id: Option<i64>,
-        pub radio_item_id: Option<i64>,
-        pub speaker_item_id: Option<i64>,
-        pub monitoring_item_id: Option<i64>,
-        pub notes: Option<String>,
-        pub searchable_model: Option<String>,
-    }
-
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {

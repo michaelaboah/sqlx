@@ -6,13 +6,13 @@ pub mod enums {
     #[repr(i64)]
     pub enum Categories {
         #[default]
-        GENERIC = 0,
+        GENERIC,
         CONSOLE,
         PROCESSOR,
         MONITORING,
         SPEAKER,
         AMPLIFIER,
-        COMPUTER,
+        COMPUTER = 6,
         NETWORK,
         RADIO,
         MICROPHONES,
@@ -389,12 +389,9 @@ pub mod creation_structs {
                 cost: item.cost,
                 weight: item.weight,
                 model: item.model.to_owned(),
-                dimensions: Some(
-                    serde_json::to_string(&item.dimensions.to_owned()).unwrap_or_default(),
-                ),
-                category: 0,
+                dimensions: Some(serde_json::to_string(&item.dimensions).unwrap_or_default()),
+                category: item.category as i64,
                 amplifier_item_id: item.amplifier.as_ref().map(|item| item.id),
-                // amplifier_item_id: None,
                 console_item_id: item.console.as_ref().map(|item| item.id),
                 computer_item_id: item.computer.as_ref().map(|item| item.id),
                 processor_item_id: item.processor.as_ref().map(|item| item.id),
@@ -403,7 +400,7 @@ pub mod creation_structs {
                 radio_item_id: item.radio_item.as_ref().map(|item| item.id),
                 speaker_item_id: item.speaker_item.as_ref().map(|item| item.id),
                 monitoring_item_id: item.monitoring_item.as_ref().map(|item| item.id),
-                notes: serde_json::to_string(&item.notes.to_owned())
+                notes: serde_json::to_string(&item.notes)
                     .map(|thing| Some(thing))
                     .unwrap_or_default(),
                 searchable_model: Some(item.model.to_owned()),
