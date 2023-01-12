@@ -6,6 +6,7 @@ pub mod sql_setup {
     use crate::sql::{
         entities::{creation_structs::CreateItem, structs::Item},
         queries::{
+            find::find_similar_item,
             insertion::insert_item,
             schema::{ITEM_RELATIONSHIPS, PRAGMA_QUERIES, TABLE_QUERIES},
         },
@@ -36,14 +37,16 @@ pub mod sql_setup {
         // let console_item: Item = serde_json::from_str(&json_string).expect("Err with parse");
         // insert_item(&console_item, path).await?;
 
-        let raw_string =
-            fs::read_to_string("src/test-multiple-items.json").expect("error with string reading");
+        // let raw_string =
+        //     fs::read_to_string("src/test-multiple-items.json").expect("error with string reading");
 
-        let items: Vec<Item> = serde_json::from_str(&raw_string).expect("Error with json parse");
+        // let items: Vec<Item> = serde_json::from_str(&raw_string).expect("Error with json parse");
 
-        for item in items.iter() {
-            insert_item(&item, path).await?;
-        }
+        // for item in items.iter() {
+        //     insert_item(&item, path).await?;
+        // }
+
+        let test = find_similar_item("D", path).await;
         // let fetch_users = sqlx::query_as!(CreateItem, "SELECT * FROM item")
         //     .fetch_all(&mut conn)
         //     .await?;

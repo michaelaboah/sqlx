@@ -3,7 +3,6 @@ mod sql;
 use dotenvy::dotenv;
 use std::env;
 
-use crate::sql::entities::structs::Item;
 // const DB_PATH: &str = "src/resources/sqlite-internal.db";
 
 fn main() {

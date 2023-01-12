@@ -1,10 +1,8 @@
 pub mod enums {
-    // use std::default;
-
     use serde::{Deserialize, Serialize};
     // use std::mem::transmute;
 
-    #[derive(Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy)]
+    #[derive(Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive)]
     #[repr(i64)]
     pub enum Categories {
         #[default]
@@ -14,7 +12,7 @@ pub mod enums {
         MONITORING,
         SPEAKER,
         AMPLIFIER,
-        COMPUTER = 6,
+        COMPUTER,
         NETWORK,
         RADIO,
         MICROPHONES,

@@ -792,7 +792,60 @@ pub mod insertion {
     }
 }
 
-pub mod find {}
+pub mod find {
+    use crate::sql::{
+        self,
+        database_setup::sql_setup::get_connection,
+        entities::{creation_structs::CreateItem, enums::Categories, structs::Item},
+    };
+
+    pub async fn find_similar_item(model: &str, path: &str) -> Vec<CreateItem> {
+        let mut conn = get_connection(path)
+            .await
+            .expect("Connection error at find_one_item.");
+        let formatted = format!("%{model}%");
+        let similar_items = sqlx::query_as!(
+            CreateItem,
+            "SELECT * from item WHERE model LIKE ?",
+            formatted
+        )
+        .fetch_all(&mut conn)
+        .await
+        .expect("Fetch error at find_one_item.");
+
+        similar_items
+    }
+
+    pub async fn find_all_items(path: &str) -> Vec<CreateItem> {
+        let mut conn = get_connection(path)
+            .await
+            .expect("Connection error at find_one_item.");
+
+        let all_items = sqlx::query_as!(CreateItem, "SELECT * FROM item;")
+            .fetch_all(&mut conn)
+            .await
+            .expect("Fetch error at find_all_items;");
+        all_items
+    }
+
+    pub async fn find_single_item(id: i64, path: &str) -> CreateItem {
+        let mut conn = get_connection(path)
+            .await
+            .expect("Connection error at find_one_item.");
+
+        let single_item = sqlx::query_as!(CreateItem, "SELECT * FROM item WHERE id = ?", id)
+            .fetch_one(&mut conn)
+            .await
+            .expect("Fetch error at find_one_item;");
+        single_item
+    }
+
+    pub async fn join(table_item: CreateItem, path: &str) -> Item {
+        let test = table_item.category as Categories;
+        println!("{test}");
+        unimplemented!();
+    }
+}
 
 pub mod update {}
 
