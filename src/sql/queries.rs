@@ -468,13 +468,13 @@ pub mod insertion {
     };
     use serde::de::value::Error;
 
-    const ITEM_INSERT: &str = "INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
+    const _ITEM_INSERT: &str = "INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
         console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,  
          notes)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)";
-    const AMPLIFIER_INSERT: &str = "INSERT INTO amplifier_item (id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
+    const _AMPLIFIER_INSERT: &str = "INSERT INTO amplifier_item (id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);";
-    const CONSOLE_INSERT: &str = "INSERT INTO console_item (
+    const _CONSOLE_INSERT: &str = "INSERT INTO console_item (
         id, total_inputs, total_outputs, total_busses, physical_inputs, physical_outputs, aux_inputs, physical_aux_inputs, phantom_power_inputs, faders, motorized, midi, protocol_inputs, signal_protocol, can_expand, max_sample_rate, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17);";
     const COMPUTER_INSERT: &str = "INSERT INTO computer_item (id, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
@@ -510,16 +510,26 @@ pub mod insertion {
                         serde_json::to_value(amplifier.physical_connectivity.to_owned())
                             .unwrap_or_default();
 
-                    sqlx::query(AMPLIFIER_INSERT)
-                        .bind(amplifier.id)
-                        .bind(amplifier.total_inputs)
-                        .bind(amplifier.total_outputs)
-                        .bind(amplifier.midi)
-                        .bind(phys_conn_bind)
-                        .bind(net_conn_bind)
-                        .bind(amplifier.signal_protocol)
-                        .bind(amplifier.max_sample_rate)
-                        .bind(power_bind)
+                    sqlx::query!("INSERT INTO amplifier_item (id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
+                        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
+                        amplifier.id,
+                        amplifier.total_inputs,
+                        amplifier.total_outputs,
+                        amplifier.midi,
+                        phys_conn_bind,
+                        net_conn_bind,
+                        amplifier.signal_protocol,
+                        amplifier.max_sample_rate,
+                        power_bind)
+                        // .bind(amplifier.id)
+                        // .bind(amplifier.total_inputs)
+                        // .bind(amplifier.total_outputs)
+                        // .bind(amplifier.midi)
+                        // .bind(phys_conn_bind)
+                        // .bind(net_conn_bind)
+                        // .bind(amplifier.signal_protocol)
+                        // .bind(amplifier.max_sample_rate)
+                        // .bind(power_bind)
                         .execute(&mut connection)
                         .await
                         .unwrap();
@@ -528,25 +538,43 @@ pub mod insertion {
             },
             Categories::CONSOLE => match &insert.console {
                 Some(console) => {
-                    let power_bind =
-                        serde_json::to_value(console.power.to_owned()).unwrap_or_default();
-                    match sqlx::query(CONSOLE_INSERT)
-                        .bind(console.id)
-                        .bind(console.total_inputs)
-                        .bind(console.total_outputs)
-                        .bind(console.total_busses)
-                        .bind(console.physical_inputs)
-                        .bind(console.physical_outputs)
-                        .bind(console.aux_inputs)
-                        .bind(console.physical_aux_inputs)
-                        .bind(console.phantom_power_inputs)
-                        .bind(console.faders)
-                        .bind(console.motorized)
-                        .bind(console.midi)
-                        .bind(console.protocol_inputs)
-                        .bind(console.signal_protocol)
-                        .bind(console.can_expand)
-                        .bind(console.max_sample_rate)
+                    let power_bind = serde_json::to_string(&console.power).unwrap_or_default();
+                    match sqlx::query!("INSERT INTO console_item (
+                        id, total_inputs, total_outputs, total_busses, physical_inputs, physical_outputs, aux_inputs, physical_aux_inputs, phantom_power_inputs, faders, motorized, midi, protocol_inputs, signal_protocol, can_expand, max_sample_rate, power)
+                        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17);",
+                        console.id,
+                        console.total_inputs,
+                        console.total_outputs,
+                        console.total_busses,
+                        console.physical_inputs,
+                        console.physical_outputs,
+                        console.aux_inputs,
+                        console.physical_aux_inputs,
+                        console.phantom_power_inputs,
+                        console.faders,
+                        console.motorized,
+                        console.midi,
+                        console.protocol_inputs,
+                        console.signal_protocol,
+                        console.can_expand,
+                        console.max_sample_rate,
+                        power_bind)
+                        // .bind(console.id)
+                        // .bind(console.total_inputs)
+                        // .bind(console.total_outputs)
+                        // .bind(console.total_busses)
+                        // .bind(console.physical_inputs)
+                        // .bind(console.physical_outputs)
+                        // .bind(console.aux_inputs)
+                        // .bind(console.physical_aux_inputs)
+                        // .bind(console.phantom_power_inputs)
+                        // .bind(console.faders)
+                        // .bind(console.motorized)
+                        // .bind(console.midi)
+                        // .bind(console.protocol_inputs)
+                        // .bind(console.signal_protocol)
+                        // .bind(console.can_expand)
+                        // .bind(console.max_sample_rate)
                         // .bind(power_bind)
                         .execute(&mut connection)
                         .await
@@ -732,7 +760,8 @@ pub mod insertion {
         match sqlx::query!("INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
             console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,
              notes)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)",
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)"
+            ,
             table.id,
             table.created_at,
             table.updated_at,
@@ -752,25 +781,6 @@ pub mod insertion {
             table.speaker_item_id,
             table.monitoring_item_id,
             table.notes)
-            // .bind(table.id)
-            // .bind(table.created_at)
-            // .bind(table.updated_at)
-            // .bind(table.public_notes)
-            // .bind(table.cost)
-            // .bind(table.weight)
-            // .bind(table.dimensions)
-            // .bind(table.model)
-            // .bind(table.category)
-            // .bind(table.amplifier_item_id)
-            // .bind(table.console_item_id)
-            // .bind(table.computer_item_id)
-            // .bind(table.processor_item_id)
-            // .bind(table.network_item_id)
-            // .bind(table.microphone_item_id)
-            // .bind(table.radio_item_id)
-            // .bind(table.speaker_item_id)
-            // .bind(table.monitoring_item_id)
-            // .bind(table.notes)
             .execute(&mut connection)
             .await
         {

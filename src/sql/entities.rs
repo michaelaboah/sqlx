@@ -1,4 +1,6 @@
 pub mod enums {
+    // use std::default;
+
     use serde::{Deserialize, Serialize};
     // use std::mem::transmute;
 
@@ -29,17 +31,16 @@ pub mod enums {
     #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
     pub enum Analog {
         #[default]
-        XlrAnalog,
-        XlrDigital,
-        Ts,
-        Trs,
-        Trrs,
-        TriPinPhoenix,
-        DualPinPhoenix,
-        Nl2,
-        Nl4,
-        Nl8,
-        Dc12v,
+        XLR_ANALOG,
+        XLR_DIGITAL,
+        TS,
+        TRS,
+        TRRS,
+        TRI_PIN_PHOENIX,
+        DUAL_PIN_PHOENIX,
+        NL2,
+        NL4,
+        NL8,
     }
 
     #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
@@ -102,6 +103,31 @@ pub mod enums {
         CONDENSOR,
         RIBBON,
     }
+    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    pub enum NetworkSpeeds {
+        #[default]
+        GIGABIT,
+        TEN_GIGABIT,
+        SUPERSPEED,
+    }
+
+    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    pub enum PowerConnector {
+        #[default]
+        IEC,
+        EDISON,
+        EDISON_20A,
+        POWERCON_20A,
+        POWERCON_32A,
+        POWERCON_TRUE1,
+        POWERCON_TRUE1_TOP,
+        L6_20,
+        L6_30,
+        L6_50,
+        L6_60,
+        POE,
+        DC_12V,
+    }
 }
 
 pub mod structs {
@@ -119,7 +145,7 @@ pub mod structs {
         pub public_notes: Option<String>,
         pub cost: f64,
         pub weight: f64,
-        pub dimensions: Dimension,
+        pub dimensions: Option<Dimension>,
         pub model: String,
         pub category: Categories,
         pub amplifier: Option<AmplifierItem>,
@@ -161,7 +187,7 @@ pub mod structs {
         pub total_inputs: i32,
         pub total_outputs: i32,
         pub midi: MidiType,
-        pub physical_connectivity: Vec<PhysicalPort>,
+        pub physical_connectivity: Option<Vec<PhysicalPort>>,
         pub network_connectivity: Vec<NetworkPort>,
         pub signal_protocol: Protocol,
         pub max_sample_rate: SampleRate,
@@ -193,7 +219,7 @@ pub mod structs {
         pub signal_protocol: Protocol,
         pub max_sample_rate: SampleRate,
         pub network_connectivity: Vec<NetworkPort>,
-        pub physical_connectivity: Vec<PhysicalPort>,
+        pub physical_connectivity: Option<Vec<PhysicalPort>>,
         pub power: Power,
     }
 
@@ -214,7 +240,7 @@ pub mod structs {
         pub phantom: bool,
         pub low_cut: bool,
         pub pad: bool,
-        pub diaphragm_size: f64,
+        pub diaphragm_size: Option<f64>,
         pub output_impedance: f64,
         pub frequency_response: String,
         pub connector: Analog,
@@ -231,7 +257,7 @@ pub mod structs {
         pub lower_frequency_response: i32,
         pub upper_frequency_response: i32,
         pub mounting_options: Vec<String>,
-        pub physical_connectivity: Vec<PhysicalPort>,
+        pub physical_connectivity: Option<Vec<PhysicalPort>>,
         pub network_connectivity: Vec<NetworkPort>,
     }
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
@@ -239,7 +265,7 @@ pub mod structs {
         pub id: i64,
         pub distro: bool,
         pub network_connectivity: Vec<NetworkPort>,
-        pub physical_connectivity: Vec<PhysicalPort>,
+        pub physical_connectivity: Option<Vec<PhysicalPort>>,
         pub power: Power,
     }
 
@@ -267,24 +293,25 @@ pub mod field_structs {
 
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct PhysicalPort {
-        port_identifier: String,
+        port_identifier: Option<String>,
         connector_type: Analog,
         signal_lines: i32,
         input: bool,
     }
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct NetworkPort {
-        port_identifier: String,
-        port_type: NetworkType,
-        input: bool,
+        port_identifier: Option<String>,
+        max_connection_speed: NetworkSpeeds,
+        power_over_ethernet: bool,
+        protocol: Protocol,
     }
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct Power {
-        pub wattage: i32,
+        pub wattage: f64,
         pub redundant: bool,
-        pub lower_voltage: i32,
+        pub lower_voltage: f64,
         pub max_wattage: f64,
-        pub input_connector: String,
+        pub input_connector: PowerConnector,
         pub output_connector: Option<String>,
     }
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
@@ -308,7 +335,7 @@ pub mod field_structs {
         port_type: ComputerPortType,
         number_of_ports: i32,
         front_port: bool,
-        version: String,
+        version: Option<String>,
     }
 }
 

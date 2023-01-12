@@ -1,0 +1,504 @@
+[
+    {
+      "id": 3,
+      "created_at": "1670447896000",
+      "updated_at": "1670447896000",
+      "cost": 2000,
+      "model": "D20",
+      "weight": 23.8,
+      "public_notes": "",
+      "category": "AMPLIFIER",
+      "notes": null,
+      "dimensions": {
+        "width": 19,
+        "length": 18.1,
+        "height": 3.5,
+        "rack_unit": 2
+      },
+      "amplifier": {
+        "id": 1,
+        "total_inputs": 4,
+        "total_outputs": 4,
+        "midi": "SERIAL",
+        "physical_connectivity": [
+          {
+            "port_identifier": null,
+            "connector_type": "NL4",
+            "signal_lines": 1,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "NL4",
+            "signal_lines": 2,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "NL4",
+            "signal_lines": 1,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "NL4",
+            "signal_lines": 1,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "NL4",
+            "signal_lines": 2,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "NL4",
+            "signal_lines": 1,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": true
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": true
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": true
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": true
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": true
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": true
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": false
+          },
+          {
+            "port_identifier": null,
+            "connector_type": "XLR_ANALOG",
+            "signal_lines": 1,
+            "input": false
+          }
+        ],
+        "network_connectivity": [
+          {
+            "protocol": "IP",
+            "power_over_ethernet": false,
+            "port_identifier": null,
+            "max_connection_speed": "SUPERSPEED"
+          },
+          {
+            "protocol": "IP",
+            "power_over_ethernet": false,
+            "port_identifier": null,
+            "max_connection_speed": "SUPERSPEED"
+          },
+          {
+            "protocol": "IP",
+            "power_over_ethernet": false,
+            "port_identifier": null,
+            "max_connection_speed": "SUPERSPEED"
+          }
+        ],
+        "signal_protocol": "IP",
+        "max_sample_rate": "UHD",
+        "power": {
+          "wattage": 6.66,
+          "redundant": false,
+          "lower_voltage": 100,
+          "max_wattage": 16,
+          "input_connector": "POWERCON_20A",
+          "output_connector": null
+        }
+      },
+      "console": null,
+      "computer": null,
+      "processor": null,
+      "network_item": null,
+      "microphone": null,
+      "radio_item": null,
+      "speaker_item": null,
+      "monitoring_item": null
+    },
+    {
+      "id": 4,
+      "created_at": "1670447900000",
+      "updated_at": "1670447900000",
+      "cost": 800,
+      "model": "Mac Mini 2018",
+      "weight": 2.9,
+      "public_notes": "",
+      "category": "COMPUTER",
+      "notes": null,
+      "dimensions": {
+        "width": 7.7,
+        "length": 7.7,
+        "height": 1.4,
+        "rack_unit": null
+      },
+      "amplifier": null,
+      "console": null,
+      "computer": {
+        "id": 1,
+        "cpu_processor": "3.6GHz quad-core Intel Core i3",
+        "ram_size": 8,
+        "total_storage": 128,
+        "model_year": "2018",
+        "operating_system": "macOS",
+        "dedicated_graphics": false,
+        "network_connectivity": [
+          {
+            "protocol": "IP",
+            "power_over_ethernet": false,
+            "port_identifier": null,
+            "max_connection_speed": "SUPERSPEED"
+          }
+        ],
+        "computer_ports": [
+          {
+            "port_type": "HDMI",
+            "number_of_ports": 1,
+            "front_port": false,
+            "version": "1.4"
+          },
+          {
+            "port_type": "USB_C_THUNDERBOLT",
+            "number_of_ports": 4,
+            "front_port": false,
+            "version": null
+          },
+          {
+            "port_type": "USB_A",
+            "number_of_ports": 2,
+            "front_port": false,
+            "version": null
+          }
+        ],
+        "power": {
+          "wattage": 70,
+          "redundant": false,
+          "lower_voltage": 100,
+          "max_wattage": 150,
+          "input_connector": "EDISON",
+          "output_connector": null
+        }
+      },
+      "processor": null,
+      "network_item": null,
+      "microphone": null,
+      "radio_item": null,
+      "speaker_item": null,
+      "monitoring_item": null
+    },
+    {
+      "id": 5,
+      "created_at": "1670447903000",
+      "updated_at": "1670447903000",
+      "cost": 2000,
+      "model": "D800-Dante A-Net Distro",
+      "weight": 12,
+      "public_notes": "",
+      "category": "MONITORING",
+      "notes": null,
+      "dimensions": {
+        "width": 19,
+        "length": 14.25,
+        "height": 3.5,
+        "rack_unit": 2
+      },
+      "amplifier": null,
+      "console": null,
+      "computer": null,
+      "processor": null,
+      "network_item": null,
+      "microphone": null,
+      "radio_item": null,
+      "speaker_item": null,
+      "monitoring_item": {
+        "id": 1,
+        "distro": true,
+        "network_connectivity": [
+          {
+            "protocol": "IP",
+            "power_over_ethernet": false,
+            "port_identifier": "Network",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": false,
+            "port_identifier": "A-Net In",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": false,
+            "port_identifier": "A-Net Out",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": false,
+            "port_identifier": "A-Net Mixes",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "DANTE",
+            "power_over_ethernet": false,
+            "port_identifier": "Dante Primary",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "DANTE",
+            "power_over_ethernet": false,
+            "port_identifier": "Dante Secondary",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 1",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 2",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 3",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 3",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 4",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 5",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 6",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 7",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "A_NET",
+            "power_over_ethernet": true,
+            "port_identifier": "A-Net 8",
+            "max_connection_speed": "GIGABIT"
+          }
+        ],
+        "physical_connectivity": null,
+        "power": {
+          "wattage": 300,
+          "redundant": false,
+          "lower_voltage": 100,
+          "max_wattage": 300,
+          "input_connector": "IEC",
+          "output_connector": null
+        }
+      }
+    },
+    {
+      "id": 6,
+      "created_at": "1670447907000",
+      "updated_at": "1670447907000",
+      "cost": 8000,
+      "model": "Galaxy 816",
+      "weight": 8,
+      "public_notes": "null",
+      "category": "PROCESSOR",
+      "notes": [
+        "AVB Ports also acts as a IP connection to a network."
+      ],
+      "dimensions": {
+        "width": 300,
+        "length": 400,
+        "height": 800,
+        "rack_unit": 2
+      },
+      "amplifier": null,
+      "console": null,
+      "computer": null,
+      "processor": {
+        "id": 1,
+        "total_outputs": 16,
+        "total_inputs": 8,
+        "physical_inputs": 8,
+        "physical_outputs": 16,
+        "midi": "USB",
+        "protocol_inputs": 24,
+        "signal_protocol": "AVB_MILAN",
+        "max_sample_rate": "UHD",
+        "network_connectivity": [
+          {
+            "protocol": "AVB_MILAN",
+            "power_over_ethernet": false,
+            "port_identifier": "AVB A",
+            "max_connection_speed": "GIGABIT"
+          },
+          {
+            "protocol": "AVB_MILAN",
+            "power_over_ethernet": false,
+            "port_identifier": "AVB B",
+            "max_connection_speed": "GIGABIT"
+          }
+        ],
+        "power": {
+          "wattage": 0.5,
+          "redundant": true,
+          "lower_voltage": 5,
+          "max_wattage": 1,
+          "input_connector": "POWERCON_20A",
+          "output_connector": "POWERCON_20A"
+        }
+      },
+      "network_item": null,
+      "microphone": null,
+      "radio_item": null,
+      "speaker_item": null,
+      "monitoring_item": null
+    },
+    {
+      "id": 7,
+      "created_at": "1670447929000",
+      "updated_at": "1670447929000",
+      "cost": 48000,
+      "model": "QL5",
+      "weight": 48.1,
+      "public_notes": "",
+      "category": "CONSOLE",
+      "notes": null,
+      "dimensions": {
+        "width": 32.6,
+        "length": 22.2,
+        "height": 10.7,
+        "rack_unit": null
+      },
+      "amplifier": null,
+      "console": {
+        "id": 1,
+        "total_outputs": 64,
+        "total_inputs": 64,
+        "total_busses": 16,
+        "physical_inputs": 32,
+        "physical_outputs": 16,
+        "aux_inputs": 0,
+        "physical_aux_inputs": 0,
+        "phantom_power_inputs": 32,
+        "faders": 34,
+        "motorized": true,
+        "midi": "SERIAL",
+        "protocol_inputs": 64,
+        "signal_protocol": "DANTE",
+        "can_expand": true,
+        "max_sample_rate": "SD",
+        "power": {
+          "wattage": 2,
+          "redundant": false,
+          "lower_voltage": 100,
+          "max_wattage": 1.2,
+          "input_connector": "IEC",
+          "output_connector": null
+        }
+      },
+      "computer": null,
+      "processor": null,
+      "network_item": null,
+      "microphone": null,
+      "radio_item": null,
+      "speaker_item": null,
+      "monitoring_item": null
+    },
+    {
+      "id": 17,
+      "created_at": "1673489730000",
+      "updated_at": "1673489730000",
+      "cost": 620,
+      "model": "4099 Core",
+      "weight": 0.95,
+      "public_notes": "",
+      "category": "MICROPHONES",
+      "notes": null,
+      "dimensions": null,
+      "amplifier": null,
+      "console": null,
+      "computer": null,
+      "processor": null,
+      "network_item": null,
+      "microphone": {
+        "id": 11,
+        "max_spl": 142,
+        "phantom": false,
+        "low_cut": false,
+        "pad": false,
+        "diaphragm_size": null,
+        "output_impedance": 30,
+        "frequency_response": "20Hz - 20kHz",
+        "connector": "XLR_ANALOG",
+        "microphone_type": ["PRE_POLORAIZED_CONDENSOR"]
+      },
+      "radio_item": null,
+      "speaker_item": null,
+      "monitoring_item": null
+    }
+  ]

@@ -1,8 +1,10 @@
 pub mod sql_setup {
 
+    use std::fs;
+
     // use futures::TyStreamExt;
     use crate::sql::{
-        entities::{creation_structs::CreateItem, enums::Categories, structs::Item},
+        entities::{creation_structs::CreateItem, structs::Item},
         queries::{
             insertion::insert_item,
             schema::{ITEM_RELATIONSHIPS, PRAGMA_QUERIES, TABLE_QUERIES},
@@ -15,7 +17,6 @@ pub mod sql_setup {
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        // dotenv().expect("init err");
         let mut conn = get_connection(path).await.expect("Problem with pool");
         //Create tables
         for table in TABLE_QUERIES.iter() {
@@ -24,22 +25,30 @@ pub mod sql_setup {
 
         //Create Relationships
         for relation in ITEM_RELATIONSHIPS.iter() {
-            sqlx::query(&relation).execute(&mut conn).await?;
+            sqlx::query(relation).execute(&mut conn).await?;
         }
 
         //Pragma Checks
         for routine in PRAGMA_QUERIES.iter() {
-            sqlx::query(&routine).execute(&mut conn).await?;
+            sqlx::query(routine).execute(&mut conn).await?;
         }
         // let json_string = fs::read_to_string("src/test.json").expect("Err with file read");
         // let console_item: Item = serde_json::from_str(&json_string).expect("Err with parse");
         // insert_item(&console_item, path).await?;
-        let fetch_users = sqlx::query_as!(CreateItem, "SELECT * FROM item")
-            .fetch_all(&mut conn)
-            .await?;
-        // .unwrap("Error with TestItem fetch");
-        // let res = fetch_users.
-        println!("{:#?}", fetch_users);
+
+        let raw_string =
+            fs::read_to_string("src/test-multiple-items.json").expect("error with string reading");
+
+        let items: Vec<Item> = serde_json::from_str(&raw_string).expect("Error with json parse");
+
+        for item in items.iter() {
+            insert_item(&item, path).await?;
+        }
+        // let fetch_users = sqlx::query_as!(CreateItem, "SELECT * FROM item")
+        //     .fetch_all(&mut conn)
+        //     .await?;
+
+        // println!("{:#?}", fetch_users);
         Ok(())
     }
 
