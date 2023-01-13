@@ -6,7 +6,7 @@ pub mod sql_setup {
     use crate::sql::{
         entities::{creation_structs::CreateItem, structs::Item},
         queries::{
-            find::find_similar_item,
+            find::{find_similar_item, fuzzy_find_single_item, join},
             insertion::insert_item,
             schema::{ITEM_RELATIONSHIPS, PRAGMA_QUERIES, TABLE_QUERIES},
         },
@@ -20,19 +20,20 @@ pub mod sql_setup {
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {
         let mut conn = get_connection(path).await.expect("Problem with pool");
         //Create tables
-        for table in TABLE_QUERIES.iter() {
-            sqlx::query(table).execute(&mut conn).await?;
-        }
+        // for table in TABLE_QUERIES.iter() {
+        //     sqlx::query(table).execute(&mut conn).await?;
+        // }
 
-        //Create Relationships
-        for relation in ITEM_RELATIONSHIPS.iter() {
-            sqlx::query(relation).execute(&mut conn).await?;
-        }
+        // //Create Relationships
+        // for relation in ITEM_RELATIONSHIPS.iter() {
+        //     sqlx::query(relation).execute(&mut conn).await?;
+        // }
+        sqlx::query_file!("src/resources/internal-schema.sql");
+        // //Pragma Checks
+        // for routine in PRAGMA_QUERIES.iter() {
+        //     sqlx::query(routine).execute(&mut conn).await?;
+        // }
 
-        //Pragma Checks
-        for routine in PRAGMA_QUERIES.iter() {
-            sqlx::query(routine).execute(&mut conn).await?;
-        }
         // let json_string = fs::read_to_string("src/test.json").expect("Err with file read");
         // let console_item: Item = serde_json::from_str(&json_string).expect("Err with parse");
         // insert_item(&console_item, path).await?;
@@ -45,8 +46,10 @@ pub mod sql_setup {
         // for item in items.iter() {
         //     insert_item(&item, path).await?;
         // }
+        let thing = fuzzy_find_single_item("QL5", path).await;
 
-        let test = find_similar_item("D", path).await;
+        join(thing).await;
+        // let test = find_similar_item("D", path).await;
         // let fetch_users = sqlx::query_as!(CreateItem, "SELECT * FROM item")
         //     .fetch_all(&mut conn)
         //     .await?;

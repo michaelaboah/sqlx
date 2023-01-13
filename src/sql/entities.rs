@@ -1,8 +1,11 @@
 pub mod enums {
+    use num_derive::FromPrimitive;
     use serde::{Deserialize, Serialize};
     // use std::mem::transmute;
 
-    #[derive(Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
     #[repr(i64)]
     pub enum Categories {
         #[default]
@@ -18,15 +21,20 @@ pub mod enums {
         MICROPHONES,
         // SPK_HARDWARE,
     }
-
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum MidiType {
         USB,
         #[default]
         SERIAL,
     }
 
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum Analog {
         #[default]
         XLR_ANALOG,
@@ -41,14 +49,21 @@ pub mod enums {
         NL8,
     }
 
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum NetworkType {
         #[default]
         Ethernet,
         Wifi,
         Cellular,
     }
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum Protocol {
         #[default]
         IP,
@@ -60,7 +75,10 @@ pub mod enums {
         ULTRANET,
         A_NET,
     }
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum SampleRate {
         #[default]
         HD,
@@ -68,7 +86,10 @@ pub mod enums {
         UHD,
     }
 
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum ComputerPortType {
         #[default]
         USB_B,
@@ -84,7 +105,10 @@ pub mod enums {
         USB_C_THUNDERBOLT,
     }
 
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum TransmitterConnector {
         #[default]
         TRRS,
@@ -93,7 +117,10 @@ pub mod enums {
         TRI_PIN,
     }
 
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum MicrophoneType {
         #[default]
         DYNAMIC,
@@ -101,7 +128,11 @@ pub mod enums {
         CONDENSOR,
         RIBBON,
     }
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum NetworkSpeeds {
         #[default]
         GIGABIT,
@@ -109,7 +140,10 @@ pub mod enums {
         SUPERSPEED,
     }
 
-    #[derive(Debug, Default, Serialize, Deserialize, PartialEq, sqlx::Type, Clone, Copy)]
+    #[derive(
+        Debug, Default, sqlx::Type, Deserialize, PartialEq, Serialize, Clone, Copy, FromPrimitive,
+    )]
+    #[repr(i64)]
     pub enum PowerConnector {
         #[default]
         IEC,
@@ -130,7 +164,12 @@ pub mod enums {
 
 pub mod structs {
     use serde::{Deserialize, Serialize};
+    use sqlx::sqlite;
     use sqlx::Decode;
+    use sqlx::SqliteConnection;
+
+    use crate::sql;
+    use crate::sql::entities::creation_structs::CreateAmplifierItem;
 
     use super::enums::*;
     use super::field_structs::*;
@@ -157,6 +196,54 @@ pub mod structs {
         pub monitoring_item: Option<MonitoringItem>,
         pub notes: Option<Vec<String>>,
     }
+    use super::creation_structs::CreateItem;
+    impl Item {
+        pub async fn new_from_table(sql_result: &CreateItem, conn: &mut SqliteConnection) -> Item {
+            Item {
+                id: sql_result.id,
+                created_at: sql_result.created_at,
+                updated_at: sql_result.updated_at,
+                public_notes: sql_result.public_notes,
+                cost: sql_result.cost,
+                weight: sql_result.weight,
+                dimensions: sql_result
+                    .dimensions
+                    .map(|d| serde_json::from_str::<Dimension>(&d).unwrap_or_default()),
+                model: sql_result.model,
+                category: num::FromPrimitive::from_i64(sql_result.category).unwrap_or_default(),
+                amplifier: {
+                    let amp_id = sqlx::query!(
+                        "SELECT amplifier_item_id FROM item where id = ?",
+                        sql_result.id
+                    )
+                    .fetch_one(conn)
+                    .await
+                    .unwrap()
+                    .amplifier_item_id;
+                    let amp = sqlx::query_as!(
+                        CreateAmplifierItem,
+                        "SELECT * FROM amplifier_item where id = ?",
+                        amp_id.unwrap()
+                    )
+                    .fetch_one(conn)
+                    .await
+                    .expect("Err w/ amplifier query");
+                    amp
+                },
+                console: todo!(),
+                computer: todo!(),
+                processor: todo!(),
+                network_item: todo!(),
+                microphone: todo!(),
+                radio_item: todo!(),
+                speaker_item: todo!(),
+                monitoring_item: todo!(),
+                notes: sql_result
+                    .notes
+                    .map(|n| serde_json::from_str::<Vec<String>>(&n).unwrap_or_default()),
+            }
+        }
+    }
 
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct ConsoleItem {
@@ -182,14 +269,44 @@ pub mod structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct AmplifierItem {
         pub id: i64,
-        pub total_inputs: i32,
-        pub total_outputs: i32,
+        pub total_inputs: i64,
+        pub total_outputs: i64,
         pub midi: MidiType,
         pub physical_connectivity: Option<Vec<PhysicalPort>>,
         pub network_connectivity: Vec<NetworkPort>,
         pub signal_protocol: Protocol,
         pub max_sample_rate: SampleRate,
         pub power: Power,
+    }
+
+    impl AmplifierItem {
+        pub fn convert_query(amplifier_query: &CreateAmplifierItem) -> AmplifierItem {
+            AmplifierItem {
+                id: amplifier_query.id,
+                total_inputs: amplifier_query.total_inputs,
+                total_outputs: amplifier_query.total_outputs,
+                midi: num::FromPrimitive::from_i64(amplifier_query.midi).unwrap_or_default(),
+                physical_connectivity: amplifier_query
+                    .physical_connectivity
+                    .map(|phys| {
+                        let thing =
+                            serde_json::from_str::<Option<Vec<PhysicalPort>>>(&phys).unwrap();
+                        thing
+                    })
+                    .unwrap_or_default(),
+                network_connectivity: serde_json::from_str::<Vec<NetworkPort>>(
+                    &amplifier_query.physical_connectivity.unwrap_or_default(),
+                )
+                .expect("JSON parse err AmplifierItem"),
+                signal_protocol: num::FromPrimitive::from_i64(amplifier_query.signal_protocol)
+                    .unwrap_or_default(),
+                max_sample_rate: SampleRate::HD,
+                power: amplifier_query
+                    .power
+                    .map(|p| serde_json::from_str::<Power>(&p).unwrap())
+                    .unwrap(),
+            }
+        }
     }
 
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
@@ -436,14 +553,14 @@ pub mod creation_structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct CreateAmplifierItem {
         pub id: i64,
-        pub total_inputs: i32,
-        pub total_outputs: i32,
-        pub midi: MidiType,
-        pub physical_connectivity: serde_json::Value,
-        pub network_connectivity: Vec<NetworkPort>,
-        pub signal_protocol: Protocol,
-        pub max_sample_rate: SampleRate,
-        pub power: Power,
+        pub total_inputs: i64,
+        pub total_outputs: i64,
+        pub midi: i64,
+        pub physical_connectivity: Option<String>,
+        pub network_connectivity: Option<String>,
+        pub signal_protocol: i64,
+        pub max_sample_rate: String,
+        pub power: Option<String>,
     }
 
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]

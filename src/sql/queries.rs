@@ -840,9 +840,63 @@ pub mod find {
         single_item
     }
 
-    pub async fn join(table_item: CreateItem, path: &str) -> Item {
-        let test = table_item.category as Categories;
-        println!("{test}");
+    pub async fn fuzzy_find_single_item(model: &str, path: &str) -> CreateItem {
+        let mut conn = get_connection(path)
+            .await
+            .expect("Connection error at find_one_item.");
+
+        let formatted = format!("%{model}%");
+
+        let single_item = sqlx::query_as!(
+            CreateItem,
+            "SELECT * FROM item WHERE model LIKE ?",
+            formatted
+        )
+        .fetch_one(&mut conn)
+        .await
+        .expect("Fetch error at fuzzy_find_one_item;");
+        single_item
+    }
+
+    pub async fn join(table_item: CreateItem) -> Item {
+        let converted_category: Option<Categories> =
+            num::FromPrimitive::from_i64(table_item.category);
+        match converted_category {
+            Some(cat) => match cat {
+                Categories::GENERIC => Item {
+                    id: table_item.id,
+                    created_at: todo!(),
+                    updated_at: todo!(),
+                    public_notes: todo!(),
+                    cost: todo!(),
+                    weight: todo!(),
+                    dimensions: todo!(),
+                    model: todo!(),
+                    category: cat,
+                    amplifier: todo!(),
+                    console: todo!(),
+                    computer: todo!(),
+                    processor: todo!(),
+                    network_item: todo!(),
+                    microphone: todo!(),
+                    radio_item: todo!(),
+                    speaker_item: todo!(),
+                    monitoring_item: todo!(),
+                    notes: todo!(),
+                },
+                Categories::CONSOLE => todo!(),
+                Categories::PROCESSOR => todo!(),
+                Categories::MONITORING => todo!(),
+                Categories::SPEAKER => todo!(),
+                Categories::AMPLIFIER => todo!(),
+                Categories::COMPUTER => todo!(),
+                Categories::NETWORK => todo!(),
+                Categories::RADIO => todo!(),
+                Categories::MICROPHONES => todo!(),
+            },
+            None => todo!(),
+        };
+        println!("{:#?}", converted_category);
         unimplemented!();
     }
 }
