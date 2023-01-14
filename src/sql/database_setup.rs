@@ -1,14 +1,11 @@
 pub mod sql_setup {
 
-    use std::fs;
+    
 
     // use futures::TyStreamExt;
     use crate::sql::{
-        entities::{creation_structs::CreateItem, structs::Item},
         queries::{
-            find::{find_similar_item, fuzzy_find_single_item},
-            insertion::insert_item,
-            schema::{ITEM_RELATIONSHIPS, PRAGMA_QUERIES, TABLE_QUERIES},
+            find::{fuzzy_find_single_item},
         },
     };
     use sqlx::{
@@ -18,7 +15,7 @@ pub mod sql_setup {
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let mut conn = get_connection(path).await.expect("Problem with pool");
+        let _conn = get_connection(path).await.expect("Problem with pool");
         //Create tables
         // for table in TABLE_QUERIES.iter() {
         //     sqlx::query(table).execute(&mut conn).await?;
@@ -46,7 +43,7 @@ pub mod sql_setup {
         // for item in items.iter() {
         //     insert_item(&item, path).await?;
         // }
-        let thing = fuzzy_find_single_item("QL5", path).await;
+        let _thing = fuzzy_find_single_item("QL5", path).await;
 
         // let test = find_similar_item("D", path).await;
         // let fetch_users = sqlx::query_as!(CreateItem, "SELECT * FROM item")

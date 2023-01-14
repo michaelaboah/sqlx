@@ -794,7 +794,6 @@ pub mod insertion {
 
 pub mod find {
     use crate::sql::{
-        self,
         database_setup::sql_setup::get_connection,
         entities::{creation_structs::CreateItem, enums::Categories, structs::Item},
     };

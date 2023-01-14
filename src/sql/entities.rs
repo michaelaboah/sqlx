@@ -164,12 +164,12 @@ pub mod enums {
 
 pub mod structs {
     use serde::{Deserialize, Serialize};
-    use sqlx::sqlite;
+    
     use sqlx::sqlite::SqlitePoolOptions;
     use sqlx::Decode;
-    use sqlx::SqliteConnection;
+    
 
-    use crate::sql;
+    
     use crate::sql::entities::creation_structs::CreateAmplifierItem;
 
     use super::enums::*;
