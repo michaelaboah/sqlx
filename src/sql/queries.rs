@@ -865,7 +865,7 @@ pub mod find {
             Some(cat) => match cat {
                 Categories::GENERIC => Item {
                     id: table_item.id,
-                    created_at: todo!(),
+                    created_at: table_item.created_at,
                     updated_at: todo!(),
                     public_notes: todo!(),
                     cost: todo!(),

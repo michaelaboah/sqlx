@@ -165,6 +165,7 @@ pub mod enums {
 pub mod structs {
     use serde::{Deserialize, Serialize};
     use sqlx::sqlite;
+    use sqlx::sqlite::SqlitePoolOptions;
     use sqlx::Decode;
     use sqlx::SqliteConnection;
 
@@ -198,37 +199,52 @@ pub mod structs {
     }
     use super::creation_structs::CreateItem;
     impl Item {
-        pub async fn new_from_table(sql_result: &CreateItem, conn: &mut SqliteConnection) -> Item {
+        pub async fn new_from_table(sql_result: &CreateItem, path: &str) -> Item {
+            let pool = SqlitePoolOptions::new()
+                .max_connections(1)
+                .connect(path)
+                .await
+                .expect("Pool error");
+
+            let dim = sql_result
+                .dimensions
+                .as_ref()
+                .map_or(None, |d| serde_json::from_str(&d).unwrap_or_default());
             Item {
                 id: sql_result.id,
-                created_at: sql_result.created_at,
-                updated_at: sql_result.updated_at,
-                public_notes: sql_result.public_notes,
+                created_at: sql_result.created_at.to_owned(),
+                updated_at: sql_result.updated_at.to_owned(),
+                public_notes: sql_result.public_notes.to_owned(),
                 cost: sql_result.cost,
                 weight: sql_result.weight,
-                dimensions: sql_result
-                    .dimensions
-                    .map(|d| serde_json::from_str::<Dimension>(&d).unwrap_or_default()),
-                model: sql_result.model,
+                dimensions: dim,
+                model: sql_result.model.to_owned(),
                 category: num::FromPrimitive::from_i64(sql_result.category).unwrap_or_default(),
                 amplifier: {
                     let amp_id = sqlx::query!(
                         "SELECT amplifier_item_id FROM item where id = ?",
                         sql_result.id
                     )
-                    .fetch_one(conn)
+                    .fetch_one(&pool)
                     .await
                     .unwrap()
                     .amplifier_item_id;
-                    let amp = sqlx::query_as!(
-                        CreateAmplifierItem,
-                        "SELECT * FROM amplifier_item where id = ?",
-                        amp_id.unwrap()
-                    )
-                    .fetch_one(conn)
-                    .await
-                    .expect("Err w/ amplifier query");
-                    amp
+
+                    let amp_result = match amp_id {
+                        Some(id) => {
+                            let result = sqlx::query_as!(
+                                CreateAmplifierItem,
+                                "SELECT * FROM amplifier_item where id = ?",
+                                id
+                            )
+                            .fetch_one(&pool)
+                            .await
+                            .expect("Err w/ amplifier query");
+                            Some(result)
+                        }
+                        None => None,
+                    };
+                    Some(amp_result.unwrap().convert_query())
                 },
                 console: todo!(),
                 computer: todo!(),
@@ -277,36 +293,6 @@ pub mod structs {
         pub signal_protocol: Protocol,
         pub max_sample_rate: SampleRate,
         pub power: Power,
-    }
-
-    impl AmplifierItem {
-        pub fn convert_query(amplifier_query: &CreateAmplifierItem) -> AmplifierItem {
-            AmplifierItem {
-                id: amplifier_query.id,
-                total_inputs: amplifier_query.total_inputs,
-                total_outputs: amplifier_query.total_outputs,
-                midi: num::FromPrimitive::from_i64(amplifier_query.midi).unwrap_or_default(),
-                physical_connectivity: amplifier_query
-                    .physical_connectivity
-                    .map(|phys| {
-                        let thing =
-                            serde_json::from_str::<Option<Vec<PhysicalPort>>>(&phys).unwrap();
-                        thing
-                    })
-                    .unwrap_or_default(),
-                network_connectivity: serde_json::from_str::<Vec<NetworkPort>>(
-                    &amplifier_query.physical_connectivity.unwrap_or_default(),
-                )
-                .expect("JSON parse err AmplifierItem"),
-                signal_protocol: num::FromPrimitive::from_i64(amplifier_query.signal_protocol)
-                    .unwrap_or_default(),
-                max_sample_rate: SampleRate::HD,
-                power: amplifier_query
-                    .power
-                    .map(|p| serde_json::from_str::<Power>(&p).unwrap())
-                    .unwrap(),
-            }
-        }
     }
 
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
@@ -561,6 +547,40 @@ pub mod creation_structs {
         pub signal_protocol: i64,
         pub max_sample_rate: String,
         pub power: Option<String>,
+    }
+
+    impl CreateAmplifierItem {
+        pub fn convert_query(&self) -> AmplifierItem {
+            AmplifierItem {
+                id: self.id,
+                total_inputs: self.total_inputs,
+                total_outputs: self.total_outputs,
+                midi: num::FromPrimitive::from_i64(self.midi).unwrap_or_default(),
+                physical_connectivity: self
+                    .physical_connectivity
+                    .as_ref()
+                    .map(|phys| {
+                        let thing =
+                            serde_json::from_str::<Option<Vec<PhysicalPort>>>(&phys).unwrap();
+                        thing
+                    })
+                    .unwrap_or_default(),
+                network_connectivity: {
+                    self.network_connectivity
+                        .as_ref()
+                        .map(|net| serde_json::from_str::<Vec<NetworkPort>>(&net).unwrap())
+                        .unwrap_or_default()
+                },
+                signal_protocol: num::FromPrimitive::from_i64(self.signal_protocol)
+                    .unwrap_or_default(),
+                max_sample_rate: SampleRate::HD,
+                power: self
+                    .power
+                    .as_ref()
+                    .map(|p| serde_json::from_str::<Power>(&p).unwrap())
+                    .unwrap(),
+            }
+        }
     }
 
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]

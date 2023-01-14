@@ -6,7 +6,7 @@ pub mod sql_setup {
     use crate::sql::{
         entities::{creation_structs::CreateItem, structs::Item},
         queries::{
-            find::{find_similar_item, fuzzy_find_single_item, join},
+            find::{find_similar_item, fuzzy_find_single_item},
             insertion::insert_item,
             schema::{ITEM_RELATIONSHIPS, PRAGMA_QUERIES, TABLE_QUERIES},
         },
@@ -48,7 +48,6 @@ pub mod sql_setup {
         // }
         let thing = fuzzy_find_single_item("QL5", path).await;
 
-        join(thing).await;
         // let test = find_similar_item("D", path).await;
         // let fetch_users = sqlx::query_as!(CreateItem, "SELECT * FROM item")
         //     .fetch_all(&mut conn)
