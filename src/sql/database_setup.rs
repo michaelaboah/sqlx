@@ -1,21 +1,17 @@
 pub mod sql_setup {
 
-    
+    use std::fs;
 
     // use futures::TyStreamExt;
-    use crate::sql::{
-        queries::{
-            find::{fuzzy_find_single_item},
-        },
-    };
-    use sqlx::{
-        sqlite::{self},
-        Connection, SqliteConnection,
-    };
+    use crate::sql::queries::find::fuzzy_find_single_item;
+    use sqlx::sqlite::SqlitePoolOptions;
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let _conn = get_connection(path).await.expect("Problem with pool");
+        let pool = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect(path)
+            .await?;
         //Create tables
         // for table in TABLE_QUERIES.iter() {
         //     sqlx::query(table).execute(&mut conn).await?;
@@ -43,7 +39,11 @@ pub mod sql_setup {
         // for item in items.iter() {
         //     insert_item(&item, path).await?;
         // }
-        let _thing = fuzzy_find_single_item("QL5", path).await;
+        let thing = fuzzy_find_single_item("D20", &pool).await;
+        let amp_item = thing.new_from_table(&pool).await;
+        let jsonb = serde_json::to_string_pretty(&amp_item).unwrap();
+        fs::write("./test_amp.json", jsonb);
+        // println!("{:#?}", jsonb);
 
         // let test = find_similar_item("D", path).await;
         // let fetch_users = sqlx::query_as!(CreateItem, "SELECT * FROM item")
@@ -52,13 +52,5 @@ pub mod sql_setup {
 
         // println!("{:#?}", fetch_users);
         Ok(())
-    }
-
-    pub async fn get_connection(path: &str) -> Result<SqliteConnection, sqlx::Error> {
-        let sql_connection = sqlite::SqliteConnection::connect(path).await;
-        match sql_connection {
-            Ok(conn) => Ok(conn),
-            Err(conn_err) => Err(conn_err),
-        }
     }
 }

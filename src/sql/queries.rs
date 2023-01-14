@@ -462,11 +462,11 @@ pub mod schema {
 }
 
 pub mod insertion {
-    use crate::sql::{
-        database_setup::sql_setup::get_connection,
-        entities::{creation_structs::CreateItem, enums::Categories, structs::Item},
-    };
+    use crate::sql::entities::{creation_structs::CreateItem, enums::Categories, structs::Item};
+
     use serde::de::value::Error;
+    use sqlx::sqlite::Sqlite;
+    use sqlx::Pool;
 
     const _ITEM_INSERT: &str = "INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
         console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,  
@@ -492,11 +492,7 @@ pub mod insertion {
     const RF_INSERT: &str = "INSERT INTO rfitem (id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
 
-    pub async fn insert_item(insert: &Item, connection_path: &str) -> Result<(), Error> {
-        let mut connection = get_connection(connection_path)
-            .await
-            .expect("insert_item: Connection failed");
-
+    pub async fn insert_item(insert: &Item, pool: &Pool<Sqlite>) -> Result<(), Error> {
         match &insert.category {
             Categories::GENERIC => (),
             Categories::AMPLIFIER => match &insert.amplifier {
@@ -530,7 +526,7 @@ pub mod insertion {
                         // .bind(amplifier.signal_protocol)
                         // .bind(amplifier.max_sample_rate)
                         // .bind(power_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -576,7 +572,7 @@ pub mod insertion {
                         // .bind(console.can_expand)
                         // .bind(console.max_sample_rate)
                         // .bind(power_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                     {
                         Ok(_) => (),
@@ -605,7 +601,7 @@ pub mod insertion {
                                 .unwrap_or_default(),
                         )
                         .bind(power_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -634,7 +630,7 @@ pub mod insertion {
                         .bind(net_conn_bind)
                         .bind(phys_conn_bind)
                         .bind(power_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -656,7 +652,7 @@ pub mod insertion {
                         .bind(net_conn_bind)
                         .bind(phys_conn_bind)
                         .bind(power_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -687,7 +683,7 @@ pub mod insertion {
                         )
                         .bind(phys_conn_bind)
                         .bind(net_conn_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -707,7 +703,7 @@ pub mod insertion {
                         .bind(net.fiber)
                         .bind(net_conn_bind)
                         .bind(power_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -726,7 +722,7 @@ pub mod insertion {
                         .bind(radio.upper_frequency_response)
                         .bind(transmitter_bind)
                         .bind(reciver_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -747,7 +743,7 @@ pub mod insertion {
                         .bind(microphone.frequency_response.to_owned())
                         .bind(microphone.connector)
                         .bind(mic_type_bind)
-                        .execute(&mut connection)
+                        .execute(pool)
                         .await
                         .unwrap();
                 }
@@ -781,7 +777,7 @@ pub mod insertion {
             table.speaker_item_id,
             table.monitoring_item_id,
             table.notes)
-            .execute(&mut connection)
+            .execute(pool)
             .await
         {
             Ok(res) => println!("{:#?}", res),
@@ -793,57 +789,41 @@ pub mod insertion {
 }
 
 pub mod find {
-    use crate::sql::{
-        database_setup::sql_setup::get_connection,
-        entities::{creation_structs::CreateItem, enums::Categories, structs::Item},
-    };
+    use crate::sql::entities::creation_structs::CreateItem;
+    use sqlx::sqlite::Sqlite;
+    use sqlx::Pool;
 
-    pub async fn find_similar_item(model: &str, path: &str) -> Vec<CreateItem> {
-        let mut conn = get_connection(path)
-            .await
-            .expect("Connection error at find_one_item.");
+    pub async fn find_similar_item(model: &str, pool: &Pool<Sqlite>) -> Vec<CreateItem> {
         let formatted = format!("%{model}%");
         let similar_items = sqlx::query_as!(
             CreateItem,
             "SELECT * from item WHERE model LIKE ?",
             formatted
         )
-        .fetch_all(&mut conn)
+        .fetch_all(pool)
         .await
         .expect("Fetch error at find_one_item.");
 
         similar_items
     }
 
-    pub async fn find_all_items(path: &str) -> Vec<CreateItem> {
-        let mut conn = get_connection(path)
-            .await
-            .expect("Connection error at find_one_item.");
-
+    pub async fn find_all_items(pool: &Pool<Sqlite>) -> Vec<CreateItem> {
         let all_items = sqlx::query_as!(CreateItem, "SELECT * FROM item;")
-            .fetch_all(&mut conn)
+            .fetch_all(pool)
             .await
             .expect("Fetch error at find_all_items;");
         all_items
     }
 
-    pub async fn find_single_item(id: i64, path: &str) -> CreateItem {
-        let mut conn = get_connection(path)
-            .await
-            .expect("Connection error at find_one_item.");
-
+    pub async fn find_single_item(id: i64, pool: &Pool<Sqlite>) -> CreateItem {
         let single_item = sqlx::query_as!(CreateItem, "SELECT * FROM item WHERE id = ?", id)
-            .fetch_one(&mut conn)
+            .fetch_one(pool)
             .await
             .expect("Fetch error at find_one_item;");
         single_item
     }
 
-    pub async fn fuzzy_find_single_item(model: &str, path: &str) -> CreateItem {
-        let mut conn = get_connection(path)
-            .await
-            .expect("Connection error at find_one_item.");
-
+    pub async fn fuzzy_find_single_item(model: &str, pool: &Pool<Sqlite>) -> CreateItem {
         let formatted = format!("%{model}%");
 
         let single_item = sqlx::query_as!(
@@ -851,52 +831,10 @@ pub mod find {
             "SELECT * FROM item WHERE model LIKE ?",
             formatted
         )
-        .fetch_one(&mut conn)
+        .fetch_one(pool)
         .await
         .expect("Fetch error at fuzzy_find_one_item;");
         single_item
-    }
-
-    pub async fn join(table_item: CreateItem) -> Item {
-        let converted_category: Option<Categories> =
-            num::FromPrimitive::from_i64(table_item.category);
-        match converted_category {
-            Some(cat) => match cat {
-                Categories::GENERIC => Item {
-                    id: table_item.id,
-                    created_at: table_item.created_at,
-                    updated_at: todo!(),
-                    public_notes: todo!(),
-                    cost: todo!(),
-                    weight: todo!(),
-                    dimensions: todo!(),
-                    model: todo!(),
-                    category: cat,
-                    amplifier: todo!(),
-                    console: todo!(),
-                    computer: todo!(),
-                    processor: todo!(),
-                    network_item: todo!(),
-                    microphone: todo!(),
-                    radio_item: todo!(),
-                    speaker_item: todo!(),
-                    monitoring_item: todo!(),
-                    notes: todo!(),
-                },
-                Categories::CONSOLE => todo!(),
-                Categories::PROCESSOR => todo!(),
-                Categories::MONITORING => todo!(),
-                Categories::SPEAKER => todo!(),
-                Categories::AMPLIFIER => todo!(),
-                Categories::COMPUTER => todo!(),
-                Categories::NETWORK => todo!(),
-                Categories::RADIO => todo!(),
-                Categories::MICROPHONES => todo!(),
-            },
-            None => todo!(),
-        };
-        println!("{:#?}", converted_category);
-        unimplemented!();
     }
 }
 

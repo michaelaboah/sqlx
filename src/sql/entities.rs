@@ -163,17 +163,10 @@ pub mod enums {
 }
 
 pub mod structs {
-    use serde::{Deserialize, Serialize};
-    
-    use sqlx::sqlite::SqlitePoolOptions;
-    use sqlx::Decode;
-    
-
-    
-    use crate::sql::entities::creation_structs::CreateAmplifierItem;
-
     use super::enums::*;
     use super::field_structs::*;
+    use serde::{Deserialize, Serialize};
+    use sqlx::Decode;
 
     #[derive(Debug, Default, sqlx::FromRow, Decode, Serialize, Deserialize, PartialEq, Clone)]
     pub struct Item {
@@ -197,70 +190,6 @@ pub mod structs {
         pub monitoring_item: Option<MonitoringItem>,
         pub notes: Option<Vec<String>>,
     }
-    use super::creation_structs::CreateItem;
-    impl Item {
-        pub async fn new_from_table(sql_result: &CreateItem, path: &str) -> Item {
-            let pool = SqlitePoolOptions::new()
-                .max_connections(1)
-                .connect(path)
-                .await
-                .expect("Pool error");
-
-            let dim = sql_result
-                .dimensions
-                .as_ref()
-                .map_or(None, |d| serde_json::from_str(&d).unwrap_or_default());
-            Item {
-                id: sql_result.id,
-                created_at: sql_result.created_at.to_owned(),
-                updated_at: sql_result.updated_at.to_owned(),
-                public_notes: sql_result.public_notes.to_owned(),
-                cost: sql_result.cost,
-                weight: sql_result.weight,
-                dimensions: dim,
-                model: sql_result.model.to_owned(),
-                category: num::FromPrimitive::from_i64(sql_result.category).unwrap_or_default(),
-                amplifier: {
-                    let amp_id = sqlx::query!(
-                        "SELECT amplifier_item_id FROM item where id = ?",
-                        sql_result.id
-                    )
-                    .fetch_one(&pool)
-                    .await
-                    .unwrap()
-                    .amplifier_item_id;
-
-                    let amp_result = match amp_id {
-                        Some(id) => {
-                            let result = sqlx::query_as!(
-                                CreateAmplifierItem,
-                                "SELECT * FROM amplifier_item where id = ?",
-                                id
-                            )
-                            .fetch_one(&pool)
-                            .await
-                            .expect("Err w/ amplifier query");
-                            Some(result)
-                        }
-                        None => None,
-                    };
-                    Some(amp_result.unwrap().convert_query())
-                },
-                console: todo!(),
-                computer: todo!(),
-                processor: todo!(),
-                network_item: todo!(),
-                microphone: todo!(),
-                radio_item: todo!(),
-                speaker_item: todo!(),
-                monitoring_item: todo!(),
-                notes: sql_result
-                    .notes
-                    .map(|n| serde_json::from_str::<Vec<String>>(&n).unwrap_or_default()),
-            }
-        }
-    }
-
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct ConsoleItem {
         pub id: i64,
@@ -482,7 +411,8 @@ pub mod creation_structs {
     use super::field_structs::*;
     use super::structs::*;
     use serde::{Deserialize, Serialize};
-
+    use sqlx::sqlite::Sqlite;
+    use sqlx::Pool;
     #[derive(Debug, Default, sqlx::FromRow, PartialEq)]
     pub struct CreateItem {
         pub id: i64,
@@ -532,6 +462,59 @@ pub mod creation_structs {
                     .map(|thing| Some(thing))
                     .unwrap_or_default(),
                 searchable_model: Some(item.model.to_owned()),
+            }
+        }
+        pub async fn new_from_table(&self, pool: &Pool<Sqlite>) -> Item {
+            let dim = self
+                .dimensions
+                .as_ref()
+                .map_or(None, |d| serde_json::from_str(&d).unwrap_or_default());
+            Item {
+                id: self.id,
+                created_at: self.created_at.to_owned(),
+                updated_at: self.updated_at.to_owned(),
+                public_notes: self.public_notes.to_owned(),
+                cost: self.cost,
+                weight: self.weight,
+                dimensions: dim,
+                model: self.model.to_owned(),
+                category: num::FromPrimitive::from_i64(self.category).unwrap_or_default(),
+                amplifier: {
+                    let amp_id =
+                        sqlx::query!("SELECT amplifier_item_id FROM item where id = ?", self.id)
+                            .fetch_one(pool)
+                            .await
+                            .unwrap()
+                            .amplifier_item_id;
+
+                    let amp_result = match amp_id {
+                        Some(id) => {
+                            let result = sqlx::query_as!(
+                                CreateAmplifierItem,
+                                "SELECT * FROM amplifier_item where id = ?",
+                                id
+                            )
+                            .fetch_one(pool)
+                            .await
+                            .expect("Err w/ amplifier query");
+                            Some(result)
+                        }
+                        None => None,
+                    };
+                    Some(amp_result.unwrap().convert_query())
+                },
+                console: None,
+                computer: None,
+                processor: None,
+                network_item: None,
+                microphone: None,
+                radio_item: None,
+                speaker_item: None,
+                monitoring_item: None,
+                notes: self
+                    .notes
+                    .as_ref()
+                    .map(|n| serde_json::from_str::<Vec<String>>(&n).unwrap_or_default()),
             }
         }
     }

@@ -1,0 +1,159 @@
+{
+  "id": 3,
+  "created_at": "1670447896000",
+  "updated_at": "1670447896000",
+  "public_notes": "",
+  "cost": 2000.0,
+  "weight": 23.8,
+  "dimensions": {
+    "width": 19.0,
+    "length": 18.1,
+    "height": 3.5,
+    "rack_unit": 2.0
+  },
+  "model": "D20",
+  "category": "AMPLIFIER",
+  "amplifier": {
+    "id": 1,
+    "total_inputs": 4,
+    "total_outputs": 4,
+    "midi": "USB",
+    "physical_connectivity": [
+      {
+        "port_identifier": null,
+        "connector_type": "NL4",
+        "signal_lines": 1,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "NL4",
+        "signal_lines": 2,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "NL4",
+        "signal_lines": 1,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "NL4",
+        "signal_lines": 1,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "NL4",
+        "signal_lines": 2,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "NL4",
+        "signal_lines": 1,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": true
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": true
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": true
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": true
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": true
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": true
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": false
+      },
+      {
+        "port_identifier": null,
+        "connector_type": "XLR_ANALOG",
+        "signal_lines": 1,
+        "input": false
+      }
+    ],
+    "network_connectivity": [
+      {
+        "port_identifier": null,
+        "max_connection_speed": "SUPERSPEED",
+        "power_over_ethernet": false,
+        "protocol": "IP"
+      },
+      {
+        "port_identifier": null,
+        "max_connection_speed": "SUPERSPEED",
+        "power_over_ethernet": false,
+        "protocol": "IP"
+      },
+      {
+        "port_identifier": null,
+        "max_connection_speed": "SUPERSPEED",
+        "power_over_ethernet": false,
+        "protocol": "IP"
+      }
+    ],
+    "signal_protocol": "IP",
+    "max_sample_rate": "HD",
+    "power": {
+      "wattage": 6.66,
+      "redundant": false,
+      "lower_voltage": 100.0,
+      "max_wattage": 16.0,
+      "input_connector": "POWERCON_20A",
+      "output_connector": null
+    }
+  },
+  "console": null,
+  "computer": null,
+  "processor": null,
+  "network_item": null,
+  "microphone": null,
+  "radio_item": null,
+  "speaker_item": null,
+  "monitoring_item": null,
+  "notes": []
+}
