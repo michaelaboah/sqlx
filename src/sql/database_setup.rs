@@ -21,7 +21,9 @@ pub mod sql_setup {
         // for relation in ITEM_RELATIONSHIPS.iter() {
         //     sqlx::query(relation).execute(&mut conn).await?;
         // }
+        //Ideally
         sqlx::query_file!("src/resources/internal-schema.sql");
+
         // //Pragma Checks
         // for routine in PRAGMA_QUERIES.iter() {
         //     sqlx::query(routine).execute(&mut conn).await?;

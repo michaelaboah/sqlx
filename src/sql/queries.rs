@@ -492,7 +492,7 @@ pub mod insertion {
     const RF_INSERT: &str = "INSERT INTO rfitem (id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
 
-    pub async fn insert_item(insert: &Item, pool: &Pool<Sqlite>) -> Result<(), Error> {
+    pub async fn insert_single_item(insert: &Item, pool: &Pool<Sqlite>) -> Result<(), Error> {
         match &insert.category {
             Categories::GENERIC => (),
             Categories::AMPLIFIER => match &insert.amplifier {
@@ -786,6 +786,16 @@ pub mod insertion {
 
         Ok(())
     }
+
+    pub async fn insert_multiple_items(
+        inserts: Vec<Item>,
+        pool: &Pool<Sqlite>,
+    ) -> Result<(), Error> {
+        for insert in inserts.iter() {
+            insert_single_item(insert, pool);
+        }
+        Ok(())
+    }
 }
 
 pub mod find {
@@ -840,4 +850,31 @@ pub mod find {
 
 pub mod update {}
 
-pub mod delete {}
+pub mod delete {
+    use crate::sql::entities::creation_structs::CreateItem;
+    use sqlx::sqlite::{Sqlite, SqliteQueryResult};
+    use sqlx::Pool;
+
+    pub async fn delete_all_items(pool: &Pool<Sqlite>) -> sqlx::Result<SqliteQueryResult> {
+        sqlx::query!("DELETE FROM item;").execute(pool).await
+    }
+
+    pub async fn delete_single_item(
+        id: i64,
+        pool: &Pool<Sqlite>,
+    ) -> sqlx::Result<SqliteQueryResult> {
+        sqlx::query!("DELETE FROM item WHERE id = ?", id)
+            .execute(pool)
+            .await
+    }
+
+    pub async fn fuzzy_delete_single_item(
+        model: &str,
+        pool: &Pool<Sqlite>,
+    ) -> sqlx::Result<SqliteQueryResult> {
+        let formatted = format!("%{model}%");
+        sqlx::query_as!(CreateItem, "DELETE FROM item WHERE model LIKE ?", formatted)
+            .execute(pool)
+            .await
+    }
+}
