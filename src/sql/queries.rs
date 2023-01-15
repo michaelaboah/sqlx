@@ -851,7 +851,6 @@ pub mod find {
 pub mod update {}
 
 pub mod delete {
-    use crate::sql::entities::creation_structs::CreateItem;
     use sqlx::sqlite::{Sqlite, SqliteQueryResult};
     use sqlx::Pool;
 
