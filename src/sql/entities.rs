@@ -485,14 +485,14 @@ pub mod creation_structs {
                 model: self.model.to_owned(),
                 category: num::FromPrimitive::from_i64(self.category).unwrap_or_default(),
                 amplifier: {
-                    let amp_id =
+                    let sub_id =
                         sqlx::query!("SELECT amplifier_item_id FROM item where id = ?", self.id)
                             .fetch_one(pool)
                             .await
                             .unwrap()
                             .amplifier_item_id;
 
-                    let amp_result = match amp_id {
+                    let sub_result = match sub_id {
                         Some(id) => {
                             let result = sqlx::query_as!(
                                 CreateAmplifierItem,
@@ -506,7 +506,10 @@ pub mod creation_structs {
                         }
                         None => None,
                     };
-                    Some(amp_result.unwrap().convert_query())
+                    match sub_result {
+                        Some(res) => Some(res.convert_query()),
+                        None => None,
+                    }
                 },
                 console: {
                     let sub_id =
@@ -530,7 +533,10 @@ pub mod creation_structs {
                         }
                         None => None,
                     };
-                    Some(sub_result.unwrap().convert_query())
+                    match sub_result {
+                        Some(res) => Some(res.convert_query()),
+                        None => None,
+                    }
                 },
                 computer: {
                     let sub_id =
@@ -554,7 +560,10 @@ pub mod creation_structs {
                         }
                         None => None,
                     };
-                    Some(sub_result.unwrap().convert_query())
+                    match sub_result {
+                        Some(res) => Some(res.convert_query()),
+                        None => None,
+                    }
                 },
                 processor: None,
                 network_item: None,
@@ -691,6 +700,7 @@ pub mod creation_structs {
         }
     }
 
+    #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct CreateComputerItem {
         pub id: i64,
         pub cpu_processor: String,
@@ -702,5 +712,74 @@ pub mod creation_structs {
         pub network_connectivity: Option<String>,
         pub computer_ports: Option<String>,
         pub power: Option<String>,
+    }
+
+    impl CreateComputerItem {
+        pub fn convert_query(&self) -> ComputerItem {
+            ComputerItem {
+                id: self.id,
+                cpu_processor: self.cpu_processor.to_owned(),
+                ram_size: self.ram_size,
+                total_storage: self.total_storage,
+                model_year: self.model_year.to_owned().unwrap(),
+                operating_system: self.operating_system.to_owned().unwrap(),
+                dedicated_graphics: self.dedicated_graphics != 0,
+                computer_ports: self
+                    .computer_ports
+                    .as_ref()
+                    .map_or(None, |cp| {
+                        Some(serde_json::from_str::<Vec<ComputerPort>>(&cp).unwrap())
+                    })
+                    .unwrap_or_default(),
+                network_connectivity: {
+                    self.network_connectivity
+                        .as_ref()
+                        .map(|net| serde_json::from_str::<Vec<NetworkPort>>(&net).unwrap())
+                        .unwrap_or_default()
+                },
+                power: self
+                    .power
+                    .as_ref()
+                    .map(|p| serde_json::from_str::<Power>(&p).unwrap())
+                    .unwrap(),
+            }
+        }
+    }
+
+    #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
+    pub struct CreateMicrophoneItem {
+        pub id: i64,
+        pub max_spl: f64,
+        pub phantom: i64,
+        pub low_cut: i64,
+        pub pad: i64,
+        pub diaphragm_size: Option<f64>,
+        pub output_impedance: f64,
+        pub frequency_response: String,
+        pub connector: i64,
+        pub microphone_type: Vec<i64>,
+    }
+
+    impl CreateMicrophoneItem {
+        pub fn convert_query(&self) -> MicrophoneItem {
+            MicrophoneItem {
+                id: self.id,
+                max_spl: self.max_spl,
+                phantom: self.phantom != 0,
+                low_cut: self.low_cut != 0,
+                pad: self.pad != 0,
+                diaphragm_size: self.diaphragm_size,
+                output_impedance: self.output_impedance,
+                frequency_response: self.frequency_response.to_owned(),
+                connector: num::FromPrimitive::from_i64(self.connector).unwrap_or_default(),
+                microphone_type: {
+                    let mut arr: Vec<MicrophoneType> = [].to_vec();
+                    for mic in &self.microphone_type {
+                        arr.push(num::FromPrimitive::from_i64(*mic).unwrap_or_default());
+                    }
+                    arr
+                },
+            }
+        }
     }
 }
