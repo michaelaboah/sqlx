@@ -36,12 +36,12 @@ This project uses SQLx to perform CRUD operations on the SQLite database.
 
 The project is structured as follows:
 
-    - mod **sql**: The main module which contains the functions for the setup of the database and the CRUD operations.
-    - mod **database_setup**: A module that handles the setup of the SQLite database.
-    - mod **sql_setup**: A submodule of database_setup that contains the functions for creating the tables and the triggers.
-    - mod **entities**: A module that contains the structs and enums used to interact with the database.
-    - mod **creation_structs**: A submodule of entities that contains the structs used to create new entries in the database.
-    - mod **enums**: A submodule of entities that contains the enums used to interact with the database.
-    - mod **field_structs**: A submodule of entities that contains the structs used to interact with the database.
-    - mod **struct_parsing**: A submodule of entities that contains the functions used to parse the structs from the database.
-    - mod **structs**: A submodule of entities that contains the struct
+    - mod sql: The main module which contains the functions for the setup of the database and the CRUD operations.
+    - mod database_setup: A module that handles the setup of the SQLite database.
+    - mod sql_setup: A submodule of database_setup that contains the functions for creating the tables and the triggers.
+    - mod entities: A module that contains the structs and enums used to interact with the database.
+    - mod creation_structs: A submodule of entities that contains the structs used to create new entries in the database.
+    - mod enums: A submodule of entities that contains the enums used to interact with the database.
+    - mod field_structs: A submodule of entities that contains the structs used to interact with the database.
+    - mod struct_parsing: A submodule of entities that contains the functions used to parse the structs from the database.
+    - mod structs: A submodule of entities that contains the struct

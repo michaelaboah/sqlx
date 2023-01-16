@@ -147,7 +147,32 @@
       "output_connector": null
     }
   },
-  "console": null,
+  "console": {
+    "id": 1,
+    "total_inputs": 64,
+    "total_outputs": 64,
+    "total_busses": 32,
+    "physical_inputs": 32,
+    "physical_outputs": 16,
+    "aux_inputs": 0,
+    "physical_aux_inputs": 0,
+    "phantom_power_inputs": 32,
+    "faders": 34,
+    "motorized": false,
+    "midi": "USB",
+    "protocol_inputs": 64,
+    "signal_protocol": "IP",
+    "can_expand": false,
+    "max_sample_rate": "HD",
+    "power": {
+      "wattage": 2.0,
+      "redundant": false,
+      "lower_voltage": 100.0,
+      "max_wattage": 1.2,
+      "input_connector": "IEC",
+      "output_connector": null
+    }
+  },
   "computer": null,
   "processor": null,
   "network_item": null,

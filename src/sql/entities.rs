@@ -193,18 +193,18 @@ pub mod structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct ConsoleItem {
         pub id: i64,
-        pub total_inputs: i32,
-        pub total_outputs: i32,
-        pub total_busses: i32,
-        pub physical_inputs: i32,
-        pub physical_outputs: i32,
-        pub aux_inputs: i32,
-        pub physical_aux_inputs: i32,
-        pub phantom_power_inputs: i32,
-        pub faders: i32,
+        pub total_inputs: i64,
+        pub total_outputs: i64,
+        pub total_busses: i64,
+        pub physical_inputs: i64,
+        pub physical_outputs: i64,
+        pub aux_inputs: i64,
+        pub physical_aux_inputs: i64,
+        pub phantom_power_inputs: i64,
+        pub faders: i64,
         pub motorized: bool,
         pub midi: MidiType,
-        pub protocol_inputs: i32,
+        pub protocol_inputs: i64,
         pub signal_protocol: Protocol,
         pub can_expand: bool,
         pub max_sample_rate: SampleRate,
@@ -228,8 +228,8 @@ pub mod structs {
     pub struct ComputerItem {
         pub id: i64,
         pub cpu_processor: String,
-        pub ram_size: i32,
-        pub total_storage: i32,
+        pub ram_size: i64,
+        pub total_storage: i64,
         pub model_year: String,
         pub operating_system: String,
         pub dedicated_graphics: bool,
@@ -240,12 +240,12 @@ pub mod structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct ProcessingItem {
         pub id: i64,
-        pub total_inputs: i32,
-        pub total_outputs: i32,
-        pub physical_inputs: i32,
-        pub physical_outputs: i32,
+        pub total_inputs: i64,
+        pub total_outputs: i64,
+        pub physical_inputs: i64,
+        pub physical_outputs: i64,
         pub midi: MidiType,
-        pub protocol_inputs: i32,
+        pub protocol_inputs: i64,
         pub signal_protocol: Protocol,
         pub max_sample_rate: SampleRate,
         pub network_connectivity: Vec<NetworkPort>,
@@ -257,8 +257,8 @@ pub mod structs {
     pub struct NetworkItem {
         pub id: i64,
         pub network_type: NetworkType,
-        pub poe_ports: i32,
-        pub max_speed: i32,
+        pub poe_ports: i64,
+        pub max_speed: i64,
         pub fiber: bool,
         pub network_connectivity: Vec<NetworkPort>,
         pub power: Power,
@@ -284,8 +284,8 @@ pub mod structs {
         pub wireless: bool,
         pub max_spl: f64,
         pub power: Power,
-        pub lower_frequency_response: i32,
-        pub upper_frequency_response: i32,
+        pub lower_frequency_response: i64,
+        pub upper_frequency_response: i64,
         pub mounting_options: Vec<String>,
         pub physical_connectivity: Option<Vec<PhysicalPort>>,
         pub network_connectivity: Vec<NetworkPort>,
@@ -302,9 +302,9 @@ pub mod structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct RFItem {
         pub id: i64,
-        pub physical_range: i32,
-        pub lower_frequency_response: i32,
-        pub upper_frequency_response: i32,
+        pub physical_range: i64,
+        pub lower_frequency_response: i64,
+        pub upper_frequency_response: i64,
         pub transmitter: Transmitter,
         pub reciever: Reciever,
     }
@@ -325,7 +325,7 @@ pub mod field_structs {
     pub struct PhysicalPort {
         port_identifier: Option<String>,
         connector_type: Analog,
-        signal_lines: i32,
+        signal_lines: i64,
         input: bool,
     }
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
@@ -363,7 +363,7 @@ pub mod field_structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct ComputerPort {
         port_type: ComputerPortType,
-        number_of_ports: i32,
+        number_of_ports: i64,
         front_port: bool,
         version: Option<String>,
     }
@@ -411,8 +411,13 @@ pub mod creation_structs {
     use super::field_structs::*;
     use super::structs::*;
     use serde::{Deserialize, Serialize};
+    use sqlx::pool;
     use sqlx::sqlite::Sqlite;
     use sqlx::Pool;
+
+    // trait SqlConvert {
+    //     fn convert_from_row(&self, pool: &Pool)
+    // }
     #[derive(Debug, Default, sqlx::FromRow, PartialEq)]
     pub struct CreateItem {
         pub id: i64,
@@ -464,7 +469,7 @@ pub mod creation_structs {
                 searchable_model: Some(item.model.to_owned()),
             }
         }
-        pub async fn new_from_table(&self, pool: &Pool<Sqlite>) -> Item {
+        pub async fn convert_from_row(&self, pool: &Pool<Sqlite>) -> Item {
             let dim = self
                 .dimensions
                 .as_ref()
@@ -503,8 +508,54 @@ pub mod creation_structs {
                     };
                     Some(amp_result.unwrap().convert_query())
                 },
-                console: None,
-                computer: None,
+                console: {
+                    let sub_id =
+                        sqlx::query!("SELECT console_item_id FROM item where id = ?", self.id)
+                            .fetch_one(pool)
+                            .await
+                            .unwrap()
+                            .console_item_id;
+
+                    let sub_result = match sub_id {
+                        Some(id) => {
+                            let result = sqlx::query_as!(
+                                CreateConsoleItem,
+                                "SELECT * FROM console_item where id = ?",
+                                id
+                            )
+                            .fetch_one(pool)
+                            .await
+                            .expect("Err w/ amplifier query");
+                            Some(result)
+                        }
+                        None => None,
+                    };
+                    Some(sub_result.unwrap().convert_query())
+                },
+                computer: {
+                    let sub_id =
+                        sqlx::query!("SELECT computer_item_id FROM item where id = ?", self.id)
+                            .fetch_one(pool)
+                            .await
+                            .unwrap()
+                            .computer_item_id;
+
+                    let sub_result = match sub_id {
+                        Some(id) => {
+                            let result = sqlx::query_as!(
+                                CreateComputerItem,
+                                "SELECT * FROM computer_item where id = ?",
+                                id
+                            )
+                            .fetch_one(pool)
+                            .await
+                            .expect("Err w/ amplifier query");
+                            Some(result)
+                        }
+                        None => None,
+                    };
+                    Some(sub_result.unwrap().convert_query())
+                },
                 processor: None,
                 network_item: None,
                 microphone: None,
@@ -569,22 +620,22 @@ pub mod creation_structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     struct CreateConsoleItem {
         pub id: i64,
-        pub total_inputs: i32,
-        pub total_outputs: i32,
-        pub total_busses: i32,
-        pub physical_inputs: i32,
-        pub physical_outputs: i32,
-        pub aux_inputs: i32,
-        pub physical_aux_inputs: i32,
-        pub phantom_power_inputs: i32,
-        pub faders: i32,
-        pub motorized: bool,
-        pub midi: MidiType,
-        pub protocol_inputs: i32,
-        pub signal_protocol: Protocol,
-        pub can_expand: bool,
-        pub max_sample_rate: SampleRate,
-        pub power: Option<serde_json::Value>,
+        pub total_inputs: i64,
+        pub total_outputs: i64,
+        pub total_busses: i64,
+        pub physical_inputs: i64,
+        pub physical_outputs: i64,
+        pub aux_inputs: i64,
+        pub physical_aux_inputs: i64,
+        pub phantom_power_inputs: i64,
+        pub faders: i64,
+        pub motorized: i64,
+        pub midi: i64,
+        pub protocol_inputs: Option<i64>,
+        pub signal_protocol: i64,
+        pub can_expand: Option<i64>,
+        pub max_sample_rate: String,
+        pub power: Option<String>,
     }
 
     impl CreateConsoleItem {
@@ -609,5 +660,47 @@ pub mod creation_structs {
                 power: todo!(),
             }
         }
+        pub fn convert_query(&self) -> ConsoleItem {
+            ConsoleItem {
+                id: self.id,
+                total_inputs: self.total_inputs,
+                total_outputs: self.total_outputs,
+                midi: num::FromPrimitive::from_i64(self.midi).unwrap_or_default(),
+                total_busses: self.physical_inputs,
+                physical_inputs: self.physical_inputs,
+                physical_outputs: self.physical_outputs,
+                aux_inputs: self.aux_inputs,
+                physical_aux_inputs: self.physical_aux_inputs,
+                phantom_power_inputs: self.phantom_power_inputs,
+                faders: self.faders,
+                motorized: self.motorized != 0,
+                protocol_inputs: self.protocol_inputs.unwrap(),
+                can_expand: match self.can_expand {
+                    Some(i) => i != 0,
+                    None => false,
+                },
+                signal_protocol: num::FromPrimitive::from_i64(self.signal_protocol)
+                    .unwrap_or_default(),
+                max_sample_rate: SampleRate::HD,
+                power: self
+                    .power
+                    .as_ref()
+                    .map(|p| serde_json::from_str::<Power>(&p).unwrap())
+                    .unwrap(),
+            }
+        }
+    }
+
+    pub struct CreateComputerItem {
+        pub id: i64,
+        pub cpu_processor: String,
+        pub ram_size: i64,
+        pub total_storage: i64,
+        pub model_year: Option<String>,
+        pub operating_system: Option<String>,
+        pub dedicated_graphics: i64,
+        pub network_connectivity: Option<String>,
+        pub computer_ports: Option<String>,
+        pub power: Option<String>,
     }
 }

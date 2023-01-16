@@ -47,7 +47,7 @@ pub mod sql_setup {
         insert_multiple_items(items, &pool).await?;
 
         let thing = fuzzy_find_single_item("D20", &pool).await;
-        let amp_item = thing.new_from_table(&pool).await;
+        let amp_item = thing.convert_from_row(&pool).await;
         let jsonb = serde_json::to_string_pretty(&amp_item).unwrap();
         fs::write("./test_amp.json", jsonb);
         // println!("{:#?}", jsonb);
