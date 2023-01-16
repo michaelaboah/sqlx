@@ -14,10 +14,10 @@
   "model": "D20",
   "category": "AMPLIFIER",
   "amplifier": {
-    "id": 1,
+    "amplifier_id": 1,
     "total_inputs": 4,
     "total_outputs": 4,
-    "midi": "USB",
+    "midi": "SERIAL",
     "physical_connectivity": [
       {
         "port_identifier": null,

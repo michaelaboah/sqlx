@@ -43,9 +43,9 @@ pub mod insertion {
                         serde_json::to_value(amplifier.physical_connectivity.to_owned())
                             .unwrap_or_default();
 
-                    sqlx::query!("INSERT INTO amplifier_item (amplifier_id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
+                    match sqlx::query!("INSERT INTO amplifier_item (amplifier_id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
-                        amplifier.id,
+                        amplifier.amplifier_id,
                         amplifier.total_inputs,
                         amplifier.total_outputs,
                         amplifier.midi,
@@ -66,7 +66,10 @@ pub mod insertion {
                         // .bind(power_bind)
                         .execute(pool)
                         .await
-                        .unwrap();
+                        {
+                            Ok(_) => (),
+                            Err(err) => println!("{err}"),
+                        }
                 }
                 None => (),
             },
@@ -128,9 +131,10 @@ pub mod insertion {
                         .unwrap_or_default();
                     let net_conn = serde_json::to_value(computer.network_connectivity.to_owned())
                         .unwrap_or_default();
-                    sqlx::query!("INSERT INTO computer_item (computer_id, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
+
+                    match sqlx::query!("INSERT INTO computer_item (computer_id, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);",
-                        computer.id,
+                        computer.computer_id,
                         computer.cpu_processor,
                         computer.ram_size,
                         computer.total_storage,
@@ -153,7 +157,10 @@ pub mod insertion {
                         // .bind(power_bind)
                         .execute(pool)
                         .await
-                        .unwrap();
+                        {
+                            Ok(_) => (),
+                            Err(err) => println!("{err}"),
+                        }
                 }
                 None => (),
             },
@@ -167,10 +174,10 @@ pub mod insertion {
                     let phys_conn_bind =
                         serde_json::to_value(processor.physical_connectivity.to_owned())
                             .unwrap_or_default();
-                    sqlx::query!(
+                    match sqlx::query!(
                         "INSERT INTO processor_item (processor_id, total_inputs, total_outputs, physical_inputs, physical_outputs, midi, protocol_inputs, signal_protocol, max_sample_rate, network_connectivity, physical_connectivity, power)
                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12);",
-                        processor.id,
+                        processor.processor_id,
                         processor.total_inputs,
                         processor.total_outputs,
                         processor.physical_inputs,
@@ -197,7 +204,10 @@ pub mod insertion {
                     // .bind(power_bind)
                     .execute(pool)
                     .await
-                    .unwrap();
+                    {
+                        Ok(_) => (),
+                        Err(err) => println!("{err}"),
+                    }
                 }
                 None => (),
             },
@@ -211,7 +221,7 @@ pub mod insertion {
                     let phys_conn_bind =
                         serde_json::to_value(monitor.physical_connectivity.to_owned())
                             .unwrap_or_default();
-                    sqlx::query!("INSERT INTO monitoring_item (monitoring_id, distro, network_connectivity, physical_connectivity, power)
+                    match sqlx::query!("INSERT INTO monitoring_item (monitoring_id, distro, network_connectivity, physical_connectivity, power)
                     VALUES (?1, ?2, ?3, ?4, ?5);",
                         monitor.id,
                         monitor.distro,
@@ -226,7 +236,10 @@ pub mod insertion {
                         // .bind(power_bind)
                         .execute(pool)
                         .await
-                        .unwrap();
+                        {
+                            Ok(_) => (),
+                            Err(err) => println!("{err}"),
+                        }
                 }
                 None => (),
             },
@@ -244,7 +257,7 @@ pub mod insertion {
                         serde_json::to_value(speaker.driver.to_owned()).unwrap_or_default();
                     let mounting_bind = serde_json::to_value(speaker.mounting_options.to_owned())
                         .unwrap_or_default();
-                    sqlx::query!("INSERT INTO speaker_item (speaker_id, driver, built_in_processing, wireless, max_spl, power, lower_frequency_response, upper_frequency_response, mounting_options, physical_connectivity, network_connectivity)
+                    match sqlx::query!("INSERT INTO speaker_item (speaker_id, driver, built_in_processing, wireless, max_spl, power, lower_frequency_response, upper_frequency_response, mounting_options, physical_connectivity, network_connectivity)
                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11);",
                         speaker.id,
                         driver,
@@ -271,7 +284,10 @@ pub mod insertion {
                         // .bind(net_conn_bind)
                         .execute(pool)
                         .await
-                        .unwrap();
+                        {
+                            Ok(_) => (),
+                            Err(err) => println!("{err}"),
+                        }
                 }
                 None => (),
             },
@@ -281,9 +297,9 @@ pub mod insertion {
                     let power_bind = serde_json::to_value(net.power.to_owned()).unwrap_or_default();
                     let net_conn_bind = serde_json::to_value(net.network_connectivity.to_owned())
                         .unwrap_or_default();
-                    sqlx::query!("INSERT INTO network_item (network_id, network_type, poe_ports, max_speed, fiber, network_connectivity, power)
+                    match sqlx::query!("INSERT INTO network_item (network_id, network_type, poe_ports, max_speed, fiber, network_connectivity, power)
                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);",
-                        net.id,
+                        net.network_id,
                         net.network_type,
                         net.poe_ports,
                         net.max_speed,
@@ -300,7 +316,10 @@ pub mod insertion {
                         // .bind(power_bind)
                         .execute(pool)
                         .await
-                        .unwrap();
+                        {
+                            Ok(_) => (),
+                            Err(err) => println!("{err}"),
+                        }
                 }
                 None => (),
             },
@@ -310,7 +329,7 @@ pub mod insertion {
                         serde_json::to_value(radio.transmitter.to_owned()).unwrap_or_default();
                     let receiver_bind =
                         serde_json::to_value(radio.reciever.to_owned()).unwrap_or_default();
-                    sqlx::query!("INSERT INTO rf_item (rf_id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
+                    match sqlx::query!("INSERT INTO rf_item (rf_id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
                     VALUES (?1, ?2, ?3, ?4, ?5, ?6);",
                         radio.id,
                         radio.physical_range,
@@ -327,7 +346,10 @@ pub mod insertion {
                         // .bind(receiver_bind)
                         .execute(pool)
                         .await
-                        .unwrap();
+                        {
+                            Ok(_) => (),
+                            Err(err) => println!("{err}"),
+                        }
                 }
                 None => (),
             },
@@ -335,9 +357,9 @@ pub mod insertion {
                 Some(ref microphone) => {
                     let mic_type_bind = serde_json::to_value(microphone.microphone_type.to_owned())
                         .unwrap_or_default();
-                    sqlx::query!("INSERT INTO microphone_item (microphone_id, max_spl, phantom, low_cut, pad, diaphragm_size, output_impedance, frequency_response, connector, microphone_type)
+                    match sqlx::query!("INSERT INTO microphone_item (microphone_id, max_spl, phantom, low_cut, pad, diaphragm_size, output_impedance, frequency_response, connector, microphone_type)
                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);",
-                        microphone.id,
+                        microphone.microphone_id,
                         microphone.max_spl,
                         microphone.phantom,
                         microphone.low_cut,
@@ -360,7 +382,10 @@ pub mod insertion {
                         // .bind(mic_type_bind)
                         .execute(pool)
                         .await
-                        .unwrap();
+                        {
+                            Ok(_) => (),
+                            Err(err) => println!("{err}"),
+                        }
                 }
                 None => (),
             },
@@ -428,7 +453,7 @@ pub mod insertion {
         pool: &Pool<Sqlite>,
     ) -> Result<(), Error> {
         for insert in inserts.iter() {
-            insert_single_item(insert, pool);
+            insert_single_item(insert, pool).await;
         }
         Ok(())
     }

@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS amplifier_item (
     physical_connectivity TEXT NULL,
     network_connectivity TEXT NULL,
     signal_protocol INTEGER NOT NULL,
-    max_sample_rate TEXT NOT NULL,
+    max_sample_rate INTEGER NOT NULL,
     power TEXT NULL,
     UNIQUE (amplifier_id)
 );
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS console_item (
     protocol_inputs INTEGER NULL,
     signal_protocol INTEGER NOT NULL,
     can_expand INTEGER NULL DEFAULT NULL,
-    max_sample_rate TEXT NOT NULL,
+    max_sample_rate INTEGER NOT NULL,
     power TEXT NULL,
     UNIQUE (console_id)
 );
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS processor_item (
     midi INTEGER NULL,
     protocol_inputs INTEGER NULL,
     signal_protocol INTEGER NOT NULL,
-    max_sample_rate TEXT NOT NULL,
+    max_sample_rate INTEGER NOT NULL,
     network_connectivity TEXT NULL,
     physical_connectivity TEXT NULL,
     power TEXT NULL,

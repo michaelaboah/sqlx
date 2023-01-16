@@ -16,7 +16,7 @@
         "rack_unit": 2
       },
       "amplifier": {
-        "id": 1,
+        "amplifier_id": 1,
         "total_inputs": 4,
         "total_outputs": 4,
         "midi": "SERIAL",
@@ -177,7 +177,7 @@
       "amplifier": null,
       "console": null,
       "computer": {
-        "id": 1,
+        "computer_id": 1,
         "cpu_processor": "3.6GHz quad-core Intel Core i3",
         "ram_size": 8,
         "total_storage": 128,
@@ -380,7 +380,7 @@
       "console": null,
       "computer": null,
       "processor": {
-        "id": 1,
+        "processor_id": 1,
         "total_outputs": 16,
         "total_inputs": 8,
         "physical_inputs": 8,
@@ -486,7 +486,7 @@
       "processor": null,
       "network_item": null,
       "microphone": {
-        "id": 11,
+        "microphone_id": 11,
         "max_spl": 142,
         "phantom": false,
         "low_cut": false,
