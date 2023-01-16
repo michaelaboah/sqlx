@@ -12,19 +12,19 @@ pub mod insertion {
     const _AMPLIFIER_INSERT: &str = "INSERT INTO amplifier_item (id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);";
     const _CONSOLE_INSERT: &str = "INSERT INTO console_item (
-        id, total_inputs, total_outputs, total_busses, physical_inputs, physical_outputs, aux_inputs, physical_aux_inputs, phantom_power_inputs, faders, motorized, midi, protocol_inputs, signal_protocol, can_expand, max_sample_rate, power)
+        console_id, total_inputs, total_outputs, total_busses, physical_inputs, physical_outputs, aux_inputs, physical_aux_inputs, phantom_power_inputs, faders, motorized, midi, protocol_inputs, signal_protocol, can_expand, max_sample_rate, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17);";
-    const COMPUTER_INSERT: &str = "INSERT INTO computer_item (id, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
+    const COMPUTER_INSERT: &str = "INSERT INTO computer_item (computerid, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);";
-    const NETWORK_INSERT: &str = "INSERT INTO network_item (id, network_type, poe_ports, max_speed, fiber, network_connectivity, power)
+    const NETWORK_INSERT: &str = "INSERT INTO network_item (network_id, network_type, poe_ports, max_speed, fiber, network_connectivity, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
-    const PROCESSOR_ITEM: &str = "INSERT INTO processor_item (id, total_inputs, total_outputs, physical_inputs, physical_outputs, midi, protocol_inputs, signal_protocol, max_sample_rate, network_connectivity, physical_connectivity, power)
+    const PROCESSOR_ITEM: &str = "INSERT INTO processor_item (processor_id, total_inputs, total_outputs, physical_inputs, physical_outputs, midi, protocol_inputs, signal_protocol, max_sample_rate, network_connectivity, physical_connectivity, power)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12);";
-    const MONITORING_INSERT: &str = "INSERT INTO monitoring_item (id, distro, network_connectivity, physical_connectivity, power)
+    const MONITORING_INSERT: &str = "INSERT INTO monitoring_item (monitoring_id, distro, network_connectivity, physical_connectivity, power)
         VALUES (?1, ?2, ?3, ?4, ?5);";
-    const MICROPHONE_INSERT: &str = "INSERT INTO microphone_item (id, max_spl, phantom, low_cut, pad, diaphragm_size, output_impedance, frequency_response, connector, microphone_type)
+    const MICROPHONE_INSERT: &str = "INSERT INTO microphone_item (microphone_id, max_spl, phantom, low_cut, pad, diaphragm_size, output_impedance, frequency_response, connector, microphone_type)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);";
-    const SPEAKER_INSERT: &str = "INSERT INTO speaker_item (id, driver, built_in_processing, wireless, max_spl, power, lower_frequency_response, upper_frequency_response, mounting_options, physical_connectivity, network_connectivity)
+    const SPEAKER_INSERT: &str = "INSERT INTO speaker_item (speaker_id, driver, built_in_processing, wireless, max_spl, power, lower_frequency_response, upper_frequency_response, mounting_options, physical_connectivity, network_connectivity)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11);";
     const RF_INSERT: &str = "INSERT INTO rf_item (id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
         VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
@@ -124,22 +124,33 @@ pub mod insertion {
                 Some(computer) => {
                     let power_bind =
                         serde_json::to_value(computer.power.to_owned()).unwrap_or_default();
+                    let port_bind = serde_json::to_value(computer.computer_ports.to_owned())
+                        .unwrap_or_default();
                     let net_conn = serde_json::to_value(computer.network_connectivity.to_owned())
                         .unwrap_or_default();
-                    sqlx::query(COMPUTER_INSERT)
-                        .bind(computer.id)
-                        .bind(computer.cpu_processor.to_owned())
-                        .bind(computer.ram_size)
-                        .bind(computer.total_storage)
-                        .bind(computer.model_year.to_owned())
-                        .bind(computer.operating_system.to_owned())
-                        .bind(computer.dedicated_graphics)
-                        .bind(net_conn)
-                        .bind(
-                            serde_json::to_value(computer.computer_ports.to_owned())
-                                .unwrap_or_default(),
-                        )
-                        .bind(power_bind)
+                    sqlx::query!("INSERT INTO computer_item (computer_id, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
+                    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);",
+                        computer.id,
+                        computer.cpu_processor,
+                        computer.ram_size,
+                        computer.total_storage,
+                        computer.model_year,
+                        computer.operating_system,
+                        computer.dedicated_graphics,
+                        net_conn,
+                        port_bind,
+                        power_bind
+                    )
+                        // .bind(computer.id)
+                        // .bind(computer.cpu_processor.to_owned())
+                        // .bind(computer.ram_size)
+                        // .bind(computer.total_storage)
+                        // .bind(computer.model_year.to_owned())
+                        // .bind(computer.operating_system.to_owned())
+                        // .bind(computer.dedicated_graphics)
+                        // .bind(net_conn)
+                        // .bind(port_bind)
+                        // .bind(power_bind)
                         .execute(pool)
                         .await
                         .unwrap();
@@ -156,22 +167,37 @@ pub mod insertion {
                     let phys_conn_bind =
                         serde_json::to_value(processor.physical_connectivity.to_owned())
                             .unwrap_or_default();
-                    sqlx::query(PROCESSOR_ITEM)
-                        .bind(processor.id)
-                        .bind(processor.total_inputs)
-                        .bind(processor.total_outputs)
-                        .bind(processor.physical_inputs)
-                        .bind(processor.physical_outputs)
-                        .bind(processor.midi)
-                        .bind(processor.protocol_inputs)
-                        .bind(processor.signal_protocol)
-                        .bind(processor.max_sample_rate)
-                        .bind(net_conn_bind)
-                        .bind(phys_conn_bind)
-                        .bind(power_bind)
-                        .execute(pool)
-                        .await
-                        .unwrap();
+                    sqlx::query!(
+                        "INSERT INTO processor_item (processor_id, total_inputs, total_outputs, physical_inputs, physical_outputs, midi, protocol_inputs, signal_protocol, max_sample_rate, network_connectivity, physical_connectivity, power)
+                        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12);",
+                        processor.id,
+                        processor.total_inputs,
+                        processor.total_outputs,
+                        processor.physical_inputs,
+                        processor.physical_outputs,
+                        processor.midi,
+                        processor.protocol_inputs,
+                        processor.signal_protocol,
+                        processor.max_sample_rate,
+                        net_conn_bind,
+                        phys_conn_bind,
+                        power_bind
+                    )
+                    // .bind(processor.id)
+                    // .bind(processor.total_inputs)
+                    // .bind(processor.total_outputs)
+                    // .bind(processor.physical_inputs)
+                    // .bind(processor.physical_outputs)
+                    // .bind(processor.midi)
+                    // .bind(processor.protocol_inputs)
+                    // .bind(processor.signal_protocol)
+                    // .bind(processor.max_sample_rate)
+                    // .bind(net_conn_bind)
+                    // .bind(phys_conn_bind)
+                    // .bind(power_bind)
+                    .execute(pool)
+                    .await
+                    .unwrap();
                 }
                 None => (),
             },
@@ -185,12 +211,19 @@ pub mod insertion {
                     let phys_conn_bind =
                         serde_json::to_value(monitor.physical_connectivity.to_owned())
                             .unwrap_or_default();
-                    sqlx::query(MONITORING_INSERT)
-                        .bind(monitor.id)
-                        .bind(monitor.distro)
-                        .bind(net_conn_bind)
-                        .bind(phys_conn_bind)
-                        .bind(power_bind)
+                    sqlx::query!("INSERT INTO monitoring_item (monitoring_id, distro, network_connectivity, physical_connectivity, power)
+                    VALUES (?1, ?2, ?3, ?4, ?5);",
+                        monitor.id,
+                        monitor.distro,
+                        net_conn_bind,
+                        phys_conn_bind,
+                        power_bind
+                    )
+                        // .bind(monitor.id)
+                        // .bind(monitor.distro)
+                        // .bind(net_conn_bind)
+                        // .bind(phys_conn_bind)
+                        // .bind(power_bind)
                         .execute(pool)
                         .await
                         .unwrap();
@@ -207,21 +240,35 @@ pub mod insertion {
                     let phys_conn_bind =
                         serde_json::to_value(speaker.physical_connectivity.to_owned())
                             .unwrap_or_default();
-                    sqlx::query(SPEAKER_INSERT)
-                        .bind(speaker.id)
-                        .bind(serde_json::to_value(speaker.driver.to_owned()).unwrap_or_default())
-                        .bind(speaker.built_in_processing)
-                        .bind(speaker.wireless)
-                        .bind(speaker.max_spl)
-                        .bind(power_bind)
-                        .bind(speaker.lower_frequency_response)
-                        .bind(speaker.upper_frequency_response)
-                        .bind(
-                            serde_json::to_value(speaker.mounting_options.to_owned())
-                                .unwrap_or_default(),
-                        )
-                        .bind(phys_conn_bind)
-                        .bind(net_conn_bind)
+                    let driver =
+                        serde_json::to_value(speaker.driver.to_owned()).unwrap_or_default();
+                    let mounting_bind = serde_json::to_value(speaker.mounting_options.to_owned())
+                        .unwrap_or_default();
+                    sqlx::query!("INSERT INTO speaker_item (speaker_id, driver, built_in_processing, wireless, max_spl, power, lower_frequency_response, upper_frequency_response, mounting_options, physical_connectivity, network_connectivity)
+                    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11);",
+                        speaker.id,
+                        driver,
+                        speaker.built_in_processing,
+                        speaker.wireless,
+                        speaker.max_spl,
+                        power_bind,
+                        speaker.lower_frequency_response,
+                        speaker.upper_frequency_response,
+                        mounting_bind,
+                        phys_conn_bind,
+                        net_conn_bind
+                )
+                        // .bind(speaker.id)
+                        // .bind(driver)
+                        // .bind(speaker.built_in_processing)
+                        // .bind(speaker.wireless)
+                        // .bind(speaker.max_spl)
+                        // .bind(power_bind)
+                        // .bind(speaker.lower_frequency_response)
+                        // .bind(speaker.upper_frequency_response)
+                        // .bind(mounting_bind)
+                        // .bind(phys_conn_bind)
+                        // .bind(net_conn_bind)
                         .execute(pool)
                         .await
                         .unwrap();
@@ -234,14 +281,23 @@ pub mod insertion {
                     let power_bind = serde_json::to_value(net.power.to_owned()).unwrap_or_default();
                     let net_conn_bind = serde_json::to_value(net.network_connectivity.to_owned())
                         .unwrap_or_default();
-                    sqlx::query(NETWORK_INSERT)
-                        .bind(net.id)
-                        .bind(net.network_type)
-                        .bind(net.poe_ports)
-                        .bind(net.max_speed)
-                        .bind(net.fiber)
-                        .bind(net_conn_bind)
-                        .bind(power_bind)
+                    sqlx::query!("INSERT INTO network_item (network_id, network_type, poe_ports, max_speed, fiber, network_connectivity, power)
+                    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);",
+                        net.id,
+                        net.network_type,
+                        net.poe_ports,
+                        net.max_speed,
+                        net.fiber,
+                        net_conn_bind,
+                        power_bind
+                )
+                        // .bind(net.id)
+                        // .bind(net.network_type)
+                        // .bind(net.poe_ports)
+                        // .bind(net.max_speed)
+                        // .bind(net.fiber)
+                        // .bind(net_conn_bind)
+                        // .bind(power_bind)
                         .execute(pool)
                         .await
                         .unwrap();
@@ -252,15 +308,23 @@ pub mod insertion {
                 Some(radio) => {
                     let transmitter_bind =
                         serde_json::to_value(radio.transmitter.to_owned()).unwrap_or_default();
-                    let reciver_bind =
+                    let receiver_bind =
                         serde_json::to_value(radio.reciever.to_owned()).unwrap_or_default();
-                    sqlx::query(RF_INSERT)
-                        .bind(radio.id)
-                        .bind(radio.physical_range)
-                        .bind(radio.lower_frequency_response)
-                        .bind(radio.upper_frequency_response)
-                        .bind(transmitter_bind)
-                        .bind(reciver_bind)
+                    sqlx::query!("INSERT INTO rf_item (rf_id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
+                    VALUES (?1, ?2, ?3, ?4, ?5, ?6);",
+                        radio.id,
+                        radio.physical_range,
+                        radio.lower_frequency_response,
+                        radio.upper_frequency_response,
+                        transmitter_bind,
+                        receiver_bind
+                    )
+                        // .bind(radio.id)
+                        // .bind(radio.physical_range)
+                        // .bind(radio.lower_frequency_response)
+                        // .bind(radio.upper_frequency_response)
+                        // .bind(transmitter_bind)
+                        // .bind(receiver_bind)
                         .execute(pool)
                         .await
                         .unwrap();
@@ -271,17 +335,29 @@ pub mod insertion {
                 Some(ref microphone) => {
                     let mic_type_bind = serde_json::to_value(microphone.microphone_type.to_owned())
                         .unwrap_or_default();
-                    sqlx::query(MICROPHONE_INSERT)
-                        .bind(microphone.id)
-                        .bind(microphone.max_spl)
-                        .bind(microphone.phantom)
-                        .bind(microphone.low_cut)
-                        .bind(microphone.pad)
-                        .bind(microphone.diaphragm_size)
-                        .bind(microphone.output_impedance)
-                        .bind(microphone.frequency_response.to_owned())
-                        .bind(microphone.connector)
-                        .bind(mic_type_bind)
+                    sqlx::query!("INSERT INTO microphone_item (microphone_id, max_spl, phantom, low_cut, pad, diaphragm_size, output_impedance, frequency_response, connector, microphone_type)
+                    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);",
+                        microphone.id,
+                        microphone.max_spl,
+                        microphone.phantom,
+                        microphone.low_cut,
+                        microphone.pad,
+                        microphone.diaphragm_size,
+                        microphone.output_impedance,
+                        microphone.frequency_response,
+                        microphone.connector,
+                        mic_type_bind
+                )
+                        // .bind(microphone.id)
+                        // .bind(microphone.max_spl)
+                        // .bind(microphone.phantom)
+                        // .bind(microphone.low_cut)
+                        // .bind(microphone.pad)
+                        // .bind(microphone.diaphragm_size)
+                        // .bind(microphone.output_impedance)
+                        // .bind(microphone.frequency_response.to_owned())
+                        // .bind(microphone.connector)
+                        // .bind(mic_type_bind)
                         .execute(pool)
                         .await
                         .unwrap();

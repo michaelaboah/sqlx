@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS rf_item (
     lower_frequency_response INTEGER NOT NULL,
     upper_frequency_response INTEGER NOT NULL,
     transmitter TEXT NULL,
-    reciever TEXT NULL,
+    receiver TEXT NULL,
     UNIQUE (rf_id)
 );
 CREATE TABLE IF NOT EXISTS speaker_item (
