@@ -1,33 +1,12 @@
 pub mod insertion {
     use crate::sql::entities::{creation_structs::CreateItem, enums::Categories, structs::Item};
-
+    use crate::sql::error_handling::sqlite_error_handler;
     use serde::de::value::Error;
+    use sqlx::error::DatabaseError;
     use sqlx::sqlite::Sqlite;
     use sqlx::Pool;
 
-    const _ITEM_INSERT: &str = "INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
-        console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,  
-         notes)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)";
-    const _AMPLIFIER_INSERT: &str = "INSERT INTO amplifier_item (id, total_inputs, total_outputs, midi, physical_connectivity, network_connectivity, signal_protocol, max_sample_rate, power)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);";
-    const _CONSOLE_INSERT: &str = "INSERT INTO console_item (
-        console_id, total_inputs, total_outputs, total_busses, physical_inputs, physical_outputs, aux_inputs, physical_aux_inputs, phantom_power_inputs, faders, motorized, midi, protocol_inputs, signal_protocol, can_expand, max_sample_rate, power)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17);";
-    const COMPUTER_INSERT: &str = "INSERT INTO computer_item (computerid, cpu_processor, ram_size, total_storage, model_year, operating_system, dedicated_graphics, network_connectivity, computer_ports, power)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);";
-    const NETWORK_INSERT: &str = "INSERT INTO network_item (network_id, network_type, poe_ports, max_speed, fiber, network_connectivity, power)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
-    const PROCESSOR_ITEM: &str = "INSERT INTO processor_item (processor_id, total_inputs, total_outputs, physical_inputs, physical_outputs, midi, protocol_inputs, signal_protocol, max_sample_rate, network_connectivity, physical_connectivity, power)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12);";
-    const MONITORING_INSERT: &str = "INSERT INTO monitoring_item (monitoring_id, distro, network_connectivity, physical_connectivity, power)
-        VALUES (?1, ?2, ?3, ?4, ?5);";
-    const MICROPHONE_INSERT: &str = "INSERT INTO microphone_item (microphone_id, max_spl, phantom, low_cut, pad, diaphragm_size, output_impedance, frequency_response, connector, microphone_type)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);";
-    const SPEAKER_INSERT: &str = "INSERT INTO speaker_item (speaker_id, driver, built_in_processing, wireless, max_spl, power, lower_frequency_response, upper_frequency_response, mounting_options, physical_connectivity, network_connectivity)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11);";
-    const RF_INSERT: &str = "INSERT INTO rf_item (id, physical_range, lower_frequency_response, upper_frequency_response, transmitter, receiver)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
+
 
     pub async fn insert_single_item(insert: &Item, pool: &Pool<Sqlite>) -> Result<(), Error> {
         match &insert.category {
@@ -55,20 +34,14 @@ pub mod insertion {
                         amplifier.max_sample_rate,
                         power_bind
                     )
-                        // .bind(amplifier.id)
-                        // .bind(amplifier.total_inputs)
-                        // .bind(amplifier.total_outputs)
-                        // .bind(amplifier.midi)
-                        // .bind(phys_conn_bind)
-                        // .bind(net_conn_bind)
-                        // .bind(amplifier.signal_protocol)
-                        // .bind(amplifier.max_sample_rate)
-                        // .bind(power_bind)
                         .execute(pool)
                         .await
                         {
                             Ok(_) => (),
-                            Err(err) => println!("{err}"),
+                            Err(err) => {
+                                sqlite_error_handler(err); 
+                                
+                            },
                         }
                 }
                 None => (),
@@ -97,28 +70,11 @@ pub mod insertion {
                         console.max_sample_rate,
                         power_bind
                     )
-                        // .bind(console.id)
-                        // .bind(console.total_inputs)
-                        // .bind(console.total_outputs)
-                        // .bind(console.total_busses)
-                        // .bind(console.physical_inputs)
-                        // .bind(console.physical_outputs)
-                        // .bind(console.aux_inputs)
-                        // .bind(console.physical_aux_inputs)
-                        // .bind(console.phantom_power_inputs)
-                        // .bind(console.faders)
-                        // .bind(console.motorized)
-                        // .bind(console.midi)
-                        // .bind(console.protocol_inputs)
-                        // .bind(console.signal_protocol)
-                        // .bind(console.can_expand)
-                        // .bind(console.max_sample_rate)
-                        // .bind(power_bind)
                         .execute(pool)
                         .await
                     {
                         Ok(_) => (),
-                        Err(err) => println!("{err}"),
+                        Err(err) => sqlite_error_handler(err),
                     }
                 }
                 None => (),
@@ -145,21 +101,11 @@ pub mod insertion {
                         port_bind,
                         power_bind
                     )
-                        // .bind(computer.id)
-                        // .bind(computer.cpu_processor.to_owned())
-                        // .bind(computer.ram_size)
-                        // .bind(computer.total_storage)
-                        // .bind(computer.model_year.to_owned())
-                        // .bind(computer.operating_system.to_owned())
-                        // .bind(computer.dedicated_graphics)
-                        // .bind(net_conn)
-                        // .bind(port_bind)
-                        // .bind(power_bind)
                         .execute(pool)
                         .await
                         {
                             Ok(_) => (),
-                            Err(err) => println!("{err}"),
+                            Err(err) => sqlite_error_handler(err),
                         }
                 }
                 None => (),
@@ -190,23 +136,11 @@ pub mod insertion {
                         phys_conn_bind,
                         power_bind
                     )
-                    // .bind(processor.id)
-                    // .bind(processor.total_inputs)
-                    // .bind(processor.total_outputs)
-                    // .bind(processor.physical_inputs)
-                    // .bind(processor.physical_outputs)
-                    // .bind(processor.midi)
-                    // .bind(processor.protocol_inputs)
-                    // .bind(processor.signal_protocol)
-                    // .bind(processor.max_sample_rate)
-                    // .bind(net_conn_bind)
-                    // .bind(phys_conn_bind)
-                    // .bind(power_bind)
                     .execute(pool)
                     .await
                     {
                         Ok(_) => (),
-                        Err(err) => println!("{err}"),
+                        Err(err) => sqlite_error_handler(err),
                     }
                 }
                 None => (),
@@ -229,16 +163,11 @@ pub mod insertion {
                         phys_conn_bind,
                         power_bind
                     )
-                        // .bind(monitor.id)
-                        // .bind(monitor.distro)
-                        // .bind(net_conn_bind)
-                        // .bind(phys_conn_bind)
-                        // .bind(power_bind)
                         .execute(pool)
                         .await
                         {
                             Ok(_) => (),
-                            Err(err) => println!("{err}"),
+                            Err(err) => sqlite_error_handler(err),
                         }
                 }
                 None => (),
@@ -271,22 +200,11 @@ pub mod insertion {
                         phys_conn_bind,
                         net_conn_bind
                 )
-                        // .bind(speaker.id)
-                        // .bind(driver)
-                        // .bind(speaker.built_in_processing)
-                        // .bind(speaker.wireless)
-                        // .bind(speaker.max_spl)
-                        // .bind(power_bind)
-                        // .bind(speaker.lower_frequency_response)
-                        // .bind(speaker.upper_frequency_response)
-                        // .bind(mounting_bind)
-                        // .bind(phys_conn_bind)
-                        // .bind(net_conn_bind)
                         .execute(pool)
                         .await
                         {
                             Ok(_) => (),
-                            Err(err) => println!("{err}"),
+                            Err(err) => sqlite_error_handler(err),
                         }
                 }
                 None => (),
@@ -307,18 +225,11 @@ pub mod insertion {
                         net_conn_bind,
                         power_bind
                 )
-                        // .bind(net.id)
-                        // .bind(net.network_type)
-                        // .bind(net.poe_ports)
-                        // .bind(net.max_speed)
-                        // .bind(net.fiber)
-                        // .bind(net_conn_bind)
-                        // .bind(power_bind)
                         .execute(pool)
                         .await
                         {
                             Ok(_) => (),
-                            Err(err) => println!("{err}"),
+                            Err(err) => sqlite_error_handler(err),
                         }
                 }
                 None => (),
@@ -338,17 +249,11 @@ pub mod insertion {
                         transmitter_bind,
                         receiver_bind
                     )
-                        // .bind(radio.id)
-                        // .bind(radio.physical_range)
-                        // .bind(radio.lower_frequency_response)
-                        // .bind(radio.upper_frequency_response)
-                        // .bind(transmitter_bind)
-                        // .bind(receiver_bind)
                         .execute(pool)
                         .await
                         {
                             Ok(_) => (),
-                            Err(err) => println!("{err}"),
+                            Err(err) => sqlite_error_handler(err),
                         }
                 }
                 None => (),
@@ -370,21 +275,11 @@ pub mod insertion {
                         microphone.connector,
                         mic_type_bind
                 )
-                        // .bind(microphone.id)
-                        // .bind(microphone.max_spl)
-                        // .bind(microphone.phantom)
-                        // .bind(microphone.low_cut)
-                        // .bind(microphone.pad)
-                        // .bind(microphone.diaphragm_size)
-                        // .bind(microphone.output_impedance)
-                        // .bind(microphone.frequency_response.to_owned())
-                        // .bind(microphone.connector)
-                        // .bind(mic_type_bind)
                         .execute(pool)
                         .await
                         {
                             Ok(_) => (),
-                            Err(err) => println!("{err}"),
+                            Err(err) => sqlite_error_handler(err),
                         }
                 }
                 None => (),
@@ -396,8 +291,7 @@ pub mod insertion {
         match sqlx::query!("INSERT INTO item (id, created_at, updated_at, public_notes, cost, weight, dimensions, model, category, amplifier_item_id,
             console_item_id, computer_item_id, processor_item_id, network_item_id, microphone_item_id, radio_item_id, speaker_item_id, monitoring_item_id,
              notes)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)"
-            ,
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)",
             table.id,
             table.created_at,
             table.updated_at,
@@ -418,26 +312,6 @@ pub mod insertion {
             table.monitoring_item_id,
             table.notes
         )
-
-        // .bind(table.id)
-        // .bind(table.created_at)
-        // .bind(table.updated_at)
-        // .bind(table.public_notes)
-        // .bind(table.cost)
-        // .bind(table.weight)
-        // .bind(table.dimensions)
-        // .bind(table.model)
-        // .bind(table.category)
-        // .bind(table.amplifier_item_id)
-        // .bind(table.console_item_id)
-        // .bind(table.computer_item_id)
-        // .bind(table.processor_item_id)
-        // .bind(table.network_item_id)
-        // .bind(table.microphone_item_id)
-        // .bind(table.radio_item_id)
-        // .bind(table.speaker_item_id)
-        // .bind(table.monitoring_item_id)
-        // .bind(table.notes)
             .execute(pool)
             .await
         {
@@ -447,6 +321,8 @@ pub mod insertion {
 
         Ok(())
     }
+
+
 
     pub async fn insert_multiple_items(
         inserts: Vec<Item>,
@@ -471,7 +347,6 @@ pub mod find {
             "SELECT * from item WHERE model LIKE ?",
             formatted
         )
-        // .bind(formatted)
         .fetch_all(pool)
         .await
         .expect("Fetch error at find_one_item.");
@@ -489,7 +364,6 @@ pub mod find {
 
     pub async fn find_single_item(id: i64, pool: &Pool<Sqlite>) -> CreateItem {
         let single_item = sqlx::query_as!(CreateItem, "SELECT * FROM item WHERE id = ?", id)
-            // .bind(id)
             .fetch_one(pool)
             .await
             .expect("Fetch error at find_one_item;");
@@ -498,13 +372,11 @@ pub mod find {
 
     pub async fn fuzzy_find_single_item(model: &str, pool: &Pool<Sqlite>) -> CreateItem {
         let formatted = format!("%{model}%");
-
         let single_item = sqlx::query_as!(
             CreateItem,
             "SELECT * FROM item WHERE model LIKE ?",
             formatted
         )
-        // .bind(formatted)
         .fetch_one(pool)
         .await
         .expect("Fetch error at fuzzy_find_one_item;");
@@ -527,7 +399,6 @@ pub mod delete {
         pool: &Pool<Sqlite>,
     ) -> sqlx::Result<SqliteQueryResult> {
         sqlx::query!("DELETE FROM item WHERE id = ?", id)
-            // .bind(id)
             .execute(pool)
             .await
     }
@@ -538,7 +409,6 @@ pub mod delete {
     ) -> sqlx::Result<SqliteQueryResult> {
         let formatted = format!("%{model}%");
         sqlx::query!("DELETE FROM item WHERE model LIKE ?", formatted)
-            // .bind(formatted)
             .execute(pool)
             .await
     }
