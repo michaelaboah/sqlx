@@ -1,13 +1,13 @@
 pub mod sql_setup {
 
-    use std::{fs, io::ErrorKind};
+    use std::{fs};
 
     // use futures::TyStreamExt;
     use crate::sql::{
         entities::structs::Item,
         queries::{find::fuzzy_find_single_item, insertion::insert_multiple_items},
     };
-    use sqlx::{error::DatabaseError, sqlite::SqlitePoolOptions};
+    use sqlx::{sqlite::SqlitePoolOptions};
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {

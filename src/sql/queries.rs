@@ -2,7 +2,7 @@ pub mod insertion {
     use crate::sql::entities::{creation_structs::CreateItem, enums::Categories, structs::Item};
     use crate::sql::error_handling::sqlite_error_handler;
     use serde::de::value::Error;
-    use sqlx::error::DatabaseError;
+    
     use sqlx::sqlite::Sqlite;
     use sqlx::Pool;
 
