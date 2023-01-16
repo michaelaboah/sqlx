@@ -182,7 +182,7 @@ pub mod structs {
         pub amplifier: Option<AmplifierItem>,
         pub console: Option<ConsoleItem>,
         pub computer: Option<ComputerItem>,
-        pub processor: Option<ProcessingItem>,
+        pub processor: Option<ProcessorItem>,
         pub network_item: Option<NetworkItem>,
         pub microphone: Option<MicrophoneItem>,
         pub radio_item: Option<RFItem>,
@@ -238,7 +238,7 @@ pub mod structs {
         pub power: Power,
     }
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
-    pub struct ProcessingItem {
+    pub struct ProcessorItem {
         pub id: i64,
         pub total_inputs: i64,
         pub total_outputs: i64,
@@ -250,7 +250,7 @@ pub mod structs {
         pub max_sample_rate: SampleRate,
         pub network_connectivity: Vec<NetworkPort>,
         pub physical_connectivity: Option<Vec<PhysicalPort>>,
-        pub power: Power,
+        pub power: Option<Power>,
     }
 
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
@@ -485,89 +485,173 @@ pub mod creation_structs {
                 model: self.model.to_owned(),
                 category: num::FromPrimitive::from_i64(self.category).unwrap_or_default(),
                 amplifier: {
-                    let sub_id =
-                        sqlx::query!("SELECT amplifier_item_id FROM item where id = ?", self.id)
-                            .fetch_one(pool)
-                            .await
-                            .unwrap()
-                            .amplifier_item_id;
+                    // let sub_id =
+                    //     sqlx::query!("SELECT amplifier_item_id FROM item where id = ?", self.id)
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .unwrap()
+                    //         .amplifier_item_id;
 
-                    let sub_result = match sub_id {
-                        Some(id) => {
-                            let result = sqlx::query_as!(
-                                CreateAmplifierItem,
-                                "SELECT * FROM amplifier_item where id = ?",
-                                id
-                            )
-                            .fetch_one(pool)
-                            .await
-                            .expect("Err w/ amplifier query");
-                            Some(result)
-                        }
-                        None => None,
-                    };
-                    match sub_result {
-                        Some(res) => Some(res.convert_query()),
-                        None => None,
-                    }
+                    // let sub_result = match sub_id {
+                    //     Some(id) => {
+                    //         let result = sqlx::query_as!(
+                    //             CreateAmplifierItem,
+                    //             "SELECT * FROM amplifier_item where id = ?",
+                    //             id
+                    //         )
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .expect("Err w/ amplifier query");
+                    //         Some(result)
+                    //     }
+                    //     None => None,
+                    // };
+                    // match sub_result {
+                    //     Some(res) => Some(res.convert_query()),
+                    //     None => None,
+                    // }
+                    None
                 },
                 console: {
-                    let sub_id =
-                        sqlx::query!("SELECT console_item_id FROM item where id = ?", self.id)
-                            .fetch_one(pool)
-                            .await
-                            .unwrap()
-                            .console_item_id;
+                    // let sub_id =
+                    //     sqlx::query!("SELECT console_item_id FROM item where id = ?", self.id)
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .unwrap()
+                    //         .console_item_id;
 
-                    let sub_result = match sub_id {
-                        Some(id) => {
-                            let result = sqlx::query_as!(
-                                CreateConsoleItem,
-                                "SELECT * FROM console_item where id = ?",
-                                id
-                            )
-                            .fetch_one(pool)
-                            .await
-                            .expect("Err w/ amplifier query");
-                            Some(result)
-                        }
-                        None => None,
-                    };
-                    match sub_result {
-                        Some(res) => Some(res.convert_query()),
-                        None => None,
-                    }
+                    // let sub_result = match sub_id {
+                    //     Some(id) => {
+                    //         let result = sqlx::query_as!(
+                    //             CreateConsoleItem,
+                    //             "SELECT * FROM console_item where id = ?",
+                    //             id
+                    //         )
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .expect("Err w/ amplifier query");
+                    //         Some(result)
+                    //     }
+                    //     None => None,
+                    // };
+                    // match sub_result {
+                    //     Some(res) => Some(res.convert_query()),
+                    //     None => None,
+                    // }
+                    None
                 },
                 computer: {
-                    let sub_id =
-                        sqlx::query!("SELECT computer_item_id FROM item where id = ?", self.id)
-                            .fetch_one(pool)
-                            .await
-                            .unwrap()
-                            .computer_item_id;
+                    // let sub_id =
+                    //     sqlx::query!("SELECT computer_item_id FROM item where id = ?", self.id)
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .unwrap()
+                    //         .computer_item_id;
 
-                    let sub_result = match sub_id {
-                        Some(id) => {
-                            let result = sqlx::query_as!(
-                                CreateComputerItem,
-                                "SELECT * FROM computer_item where id = ?",
-                                id
-                            )
-                            .fetch_one(pool)
-                            .await
-                            .expect("Err w/ amplifier query");
-                            Some(result)
-                        }
-                        None => None,
-                    };
-                    match sub_result {
-                        Some(res) => Some(res.convert_query()),
-                        None => None,
-                    }
+                    // let sub_result = match sub_id {
+                    //     Some(id) => {
+                    //         let result = sqlx::query_as!(
+                    //             CreateComputerItem,
+                    //             "SELECT * FROM computer_item where id = ?",
+                    //             id
+                    //         )
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .expect("Err w/ amplifier query");
+                    //         Some(result)
+                    //     }
+                    //     None => None,
+                    // };
+                    // match sub_result {
+                    //     Some(res) => Some(res.convert_query()),
+                    //     None => None,
+                    // }
+                    None
                 },
-                processor: None,
-                network_item: None,
-                microphone: None,
+                processor: {
+                    // let sub_id =
+                    //     sqlx::query!("SELECT network_item_id FROM item where id = ?", self.id)
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .unwrap()
+                    //         .network_item_id;
+
+                    // let sub_result = match sub_id {
+                    //     Some(id) => {
+                    //         let result = sqlx::query_as!(
+                    //             CreateProcessorItem,
+                    //             "SELECT * FROM processor_item where id = ?",
+                    //             id
+                    //         )
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .expect("Err w/ amplifier query");
+                    //         Some(result)
+                    //     }
+                    //     None => None,
+                    // };
+                    // match sub_result {
+                    //     Some(res) => Some(res.convert_query()),
+                    //     None => None,
+                    // }
+                    None
+                },
+                network_item: {
+                    // let sub_id =
+                    //     sqlx::query!("SELECT network_item_id FROM item where id = ?", self.id)
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .unwrap()
+                    //         .network_item_id;
+
+                    // let sub_result = match sub_id {
+                    //     Some(id) => {
+                    //         let result = sqlx::query_as!(
+                    //             CreateNetworkItem,
+                    //             "SELECT * FROM network_item where id = ?",
+                    //             id
+                    //         )
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .expect("Err w/ amplifier query");
+                    //         Some(result)
+                    //     }
+                    //     None => None,
+                    // };
+                    // match sub_result {
+                    //     Some(res) => Some(res.convert_query()),
+                    //     None => None,
+                    // }
+                    None
+                },
+                microphone: {
+                    // let sub_id =
+                    //     sqlx::query!("SELECT microphone_item_id FROM item where id = ?", self.id)
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .unwrap()
+                    //         .microphone_item_id;
+
+                    // let sub_result = match sub_id {
+                    //     Some(id) => {
+                    //         let result = sqlx::query_as!(
+                    //             CreateMicrophoneItem,
+                    //             "SELECT * FROM microphone_item where id = ?",
+                    //             id
+                    //         )
+                    //         .fetch_one(pool)
+                    //         .await
+                    //         .expect("Err w/ microphone query");
+                    //         Some(result)
+                    //     }
+                    //     None => None,
+                    // };
+                    // match sub_result {
+                    //     Some(res) => Some(res.convert_query()),
+                    //     None => None,
+                    // }
+                    None
+                },
                 radio_item: None,
                 speaker_item: None,
                 monitoring_item: None,
@@ -749,36 +833,111 @@ pub mod creation_structs {
     #[derive(Debug, Default, sqlx::FromRow, Serialize, Deserialize, PartialEq, Clone)]
     pub struct CreateMicrophoneItem {
         pub id: i64,
-        pub max_spl: f64,
-        pub phantom: i64,
-        pub low_cut: i64,
-        pub pad: i64,
-        pub diaphragm_size: Option<f64>,
-        pub output_impedance: f64,
-        pub frequency_response: String,
+        pub max_spl: i64,
+        pub phantom: Option<i64>,
+        pub low_cut: Option<i64>,
+        pub pad: Option<i64>,
+        pub diaphragm_size: Option<i64>,
+        pub output_impedance: Option<i64>,
+        pub frequency_response: Option<String>,
         pub connector: i64,
-        pub microphone_type: Vec<i64>,
+        pub microphone_type: String,
     }
 
     impl CreateMicrophoneItem {
         pub fn convert_query(&self) -> MicrophoneItem {
             MicrophoneItem {
                 id: self.id,
-                max_spl: self.max_spl,
-                phantom: self.phantom != 0,
-                low_cut: self.low_cut != 0,
-                pad: self.pad != 0,
-                diaphragm_size: self.diaphragm_size,
-                output_impedance: self.output_impedance,
-                frequency_response: self.frequency_response.to_owned(),
+                max_spl: self.max_spl as f64,
+                phantom: self.phantom.unwrap_or_default() != 0,
+                low_cut: self.low_cut.unwrap_or_default() != 0,
+                pad: self.pad.unwrap_or_default() != 0,
+                diaphragm_size: Some(self.diaphragm_size.unwrap_or_default() as f64),
+                output_impedance: self.output_impedance.unwrap_or_default() as f64,
+                frequency_response: self.frequency_response.to_owned().unwrap_or_default(),
                 connector: num::FromPrimitive::from_i64(self.connector).unwrap_or_default(),
                 microphone_type: {
-                    let mut arr: Vec<MicrophoneType> = [].to_vec();
-                    for mic in &self.microphone_type {
-                        arr.push(num::FromPrimitive::from_i64(*mic).unwrap_or_default());
-                    }
-                    arr
+                    serde_json::from_str(&self.microphone_type).unwrap_or_default()
                 },
+            }
+        }
+    }
+
+    pub struct CreateNetworkItem {
+        pub id: i64,
+        pub network_type: i64,
+        pub poe_ports: i64,
+        pub max_speed: i64,
+        pub fiber: Option<i64>,
+        pub network_connectivity: Option<String>,
+        pub power: Option<String>,
+    }
+
+    impl CreateNetworkItem {
+        pub fn convert_query(&self) -> NetworkItem {
+            NetworkItem {
+                id: self.id,
+                network_type: num::FromPrimitive::from_i64(self.network_type).unwrap_or_default(),
+                poe_ports: self.poe_ports,
+                max_speed: self.max_speed,
+                fiber: self.fiber.unwrap_or_default() != 0,
+                network_connectivity: self
+                    .network_connectivity
+                    .as_ref()
+                    .map(|net| serde_json::from_str::<Vec<NetworkPort>>(net).unwrap_or_default())
+                    .unwrap_or_default(),
+                power: self
+                    .power
+                    .as_ref()
+                    .map(|p| serde_json::from_str::<Power>(&p).unwrap_or_default())
+                    .unwrap(),
+            }
+        }
+    }
+
+    pub struct CreateProcessorItem {
+        pub id: i64,
+        pub total_inputs: i64,
+        pub total_outputs: i64,
+        pub physical_inputs: i64,
+        pub physical_outputs: i64,
+        pub midi: Option<i64>,
+        pub protocol_inputs: Option<i64>,
+        pub signal_protocol: i64,
+        pub max_sample_rate: i64,
+        pub network_connectivity: Option<String>,
+        pub physical_connectivity: Option<String>,
+        pub power: Option<String>,
+    }
+
+    impl CreateProcessorItem {
+        fn convert_query(&self) -> ProcessorItem {
+            ProcessorItem {
+                id: self.id,
+                total_inputs: self.total_inputs,
+                total_outputs: self.total_outputs,
+                physical_inputs: self.physical_inputs,
+                physical_outputs: self.physical_outputs,
+                midi: num::FromPrimitive::from_i64(self.midi.unwrap_or_default())
+                    .unwrap_or_default(),
+                protocol_inputs: self.protocol_inputs.unwrap_or_default(),
+                signal_protocol: num::FromPrimitive::from_i64(self.signal_protocol)
+                    .unwrap_or_default(),
+                max_sample_rate: num::FromPrimitive::from_i64(self.max_sample_rate)
+                    .unwrap_or_default(),
+                network_connectivity: self
+                    .network_connectivity
+                    .as_ref()
+                    .map(|net| serde_json::from_str(net).unwrap_or_default())
+                    .unwrap(),
+                physical_connectivity: self
+                    .physical_connectivity
+                    .as_ref()
+                    .map(|phys| serde_json::from_str(phys).unwrap_or_default()),
+                power: self
+                    .power
+                    .as_ref()
+                    .map(|pow| serde_json::from_str(pow).unwrap_or_default()),
             }
         }
     }

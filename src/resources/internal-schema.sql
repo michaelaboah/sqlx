@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS item (
     CONSTRAINT item_processor_id FOREIGN KEY(processor_item_id) REFERENCES processor_item(processor_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT item_network_item_id FOREIGN KEY(network_item_id) REFERENCES network_item(network_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT item_microphone_id FOREIGN KEY(microphone_item_id) REFERENCES microphone_item(microphone_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT item_radio_item_id FOREIGN KEY(radio_item_id) REFERENCES rfitem(rf_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT item_radio_item_id FOREIGN KEY(radio_item_id) REFERENCES rf_item(rf_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT item_speaker_item_id FOREIGN KEY(speaker_item_id) REFERENCES speaker_item(speaker_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT item_monitoring_item_id FOREIGN KEY(monitoring_item_id) REFERENCES monitoring_item(monitoring_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS computer_item (
     dedicated_graphics INTEGER NOT NULL,
     network_connectivity TEXT NULL,
     computer_ports TEXT NULL,
-    power TEXT NULL
+    power TEXT NULL,
+    UNIQUE (computer_id)
 );
 CREATE TABLE IF NOT EXISTS console_item (
     console_id INTEGER NOT NULL PRIMARY KEY autoincrement,
@@ -70,10 +71,11 @@ CREATE TABLE IF NOT EXISTS console_item (
     signal_protocol INTEGER NOT NULL,
     can_expand INTEGER NULL DEFAULT NULL,
     max_sample_rate TEXT NOT NULL,
-    power TEXT NULL
+    power TEXT NULL,
+    UNIQUE (console_id)
 );
 CREATE TABLE IF NOT EXISTS microphone_item (
-    id INTEGER NOT NULL PRIMARY KEY autoincrement,
+    microphone_id INTEGER NOT NULL PRIMARY KEY autoincrement,
     max_spl INTEGER NOT NULL,
     phantom INTEGER NULL,
     low_cut INTEGER NULL,
@@ -82,14 +84,16 @@ CREATE TABLE IF NOT EXISTS microphone_item (
     output_impedance INTEGER NULL,
     frequency_response TEXT NULL,
     connector INTEGER NOT NULL,
-    microphone_type TEXT NOT NULL
+    microphone_type TEXT NOT NULL,
+    UNIQUE (microphone_id)
 );
 CREATE TABLE IF NOT EXISTS monitoring_item (
     monitoring_id INTEGER NOT NULL PRIMARY KEY autoincrement,
     distro INTEGER NULL,
     network_connectivity TEXT NULL,
     physical_connectivity TEXT NULL,
-    power TEXT NULL
+    power TEXT NULL,
+    UNIQUE (monitoring_id)
 );
 CREATE TABLE IF NOT EXISTS network_item (
     network_id INTEGER NOT NULL PRIMARY KEY autoincrement,
@@ -98,7 +102,8 @@ CREATE TABLE IF NOT EXISTS network_item (
     max_speed INTEGER NOT NULL,
     fiber INTEGER NULL,
     network_connectivity TEXT NULL,
-    power TEXT NULL
+    power TEXT NULL,
+    UNIQUE (network_id)
 );
 CREATE TABLE IF NOT EXISTS processor_item (
     processor_id INTEGER NOT NULL PRIMARY KEY autoincrement,
@@ -112,7 +117,8 @@ CREATE TABLE IF NOT EXISTS processor_item (
     max_sample_rate TEXT NOT NULL,
     network_connectivity TEXT NULL,
     physical_connectivity TEXT NULL,
-    power TEXT NULL
+    power TEXT NULL,
+    UNIQUE (processor_id)
 );
 CREATE TABLE IF NOT EXISTS rf_item (
     rf_id INTEGER NOT NULL PRIMARY KEY autoincrement,
@@ -120,7 +126,8 @@ CREATE TABLE IF NOT EXISTS rf_item (
     lower_frequency_response INTEGER NOT NULL,
     upper_frequency_response INTEGER NOT NULL,
     transmitter TEXT NULL,
-    reciever TEXT NULL
+    reciever TEXT NULL,
+    UNIQUE (rf_id)
 );
 CREATE TABLE IF NOT EXISTS speaker_item (
     speaker_id INTEGER NOT NULL PRIMARY KEY autoincrement,
@@ -133,20 +140,21 @@ CREATE TABLE IF NOT EXISTS speaker_item (
     mounting_options TEXT NOT NULL,
     physical_connectivity TEXT NULL,
     network_connectivity TEXT NULL,
-    power TEXT NOT NULL
+    power TEXT NOT NULL,
+    UNIQUE (speaker_id)
 );
-CREATE TABLE IF NOT EXISTS rfband (
-    band_id INTEGER NOT NULL PRIMARY KEY autoincrement,
-    rf_item_id INTEGER NOT NULL,
-    band_name TEXT NOT NULL,
-    lower_frequency_range INTEGER NOT NULL,
-    upper_frequency_range INTEGER NOT NULL,
-    manufacturer TEXT NOT NULL,
-    nation_code INTEGER NOT NULL,
-    deprecated INTEGER NOT NULL,
-    CONSTRAINT rfband_rf_item_id FOREIGN KEY(rf_item_id) REFERENCES rfitem(id) ON UPDATE CASCADE
-);
-CREATE INDEX IF NOT EXISTS rfband_rf_item_id_index ON rfband (rf_item_id);
+-- CREATE TABLE IF NOT EXISTS rfband (
+--     band_id INTEGER NOT NULL PRIMARY KEY autoincrement,
+--     rf_item_id INTEGER NOT NULL,
+--     band_name TEXT NOT NULL,
+--     lower_frequency_range INTEGER NOT NULL,
+--     upper_frequency_range INTEGER NOT NULL,
+--     manufacturer TEXT NOT NULL,
+--     nation_code INTEGER NOT NULL,
+--     deprecated INTEGER NOT NULL,
+--     CONSTRAINT rfband_rf_item_id FOREIGN KEY(rf_item_id) REFERENCES rf_item(id) ON UPDATE CASCADE
+-- );
+-- CREATE INDEX IF NOT EXISTS rfband_rf_item_id_index ON rfband (rf_item_id);
 CREATE UNIQUE INDEX IF NOT EXISTS rfband_band_name_unique ON rfband (band_name);
 CREATE UNIQUE INDEX IF NOT EXISTS item_model_unique ON item (model);
 CREATE UNIQUE INDEX IF NOT EXISTS item_amplifier_item_id_unique ON item (amplifier_item_id);
@@ -189,9 +197,9 @@ AFTER DELETE ON item BEGIN
 DELETE FROM microphone_item
 WHERE microphone_id = old.microphone_item_id;
 END;
-CREATE TRIGGER delete_rfitem
+CREATE TRIGGER delete_rf_item
 AFTER DELETE ON item BEGIN
-DELETE FROM rfitem
+DELETE FROM rf_item
 WHERE rf_id = old.radio_item_id;
 END;
 CREATE TRIGGER delete_speaker_item
