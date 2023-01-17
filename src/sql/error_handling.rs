@@ -1,7 +1,14 @@
+use sqlx::sqlite::SqliteQueryResult;
+
 #[derive(Debug)]
 enum SqliteError {
     ItemAlreadyExists,
     Unknown(String),
+}
+pub enum SqlResult {
+    QuerySuccess(SqliteQueryResult),
+    AcceptableError(String),
+    UnacceptableError(String),
 }
 
 impl std::convert::From<sqlx::Error> for SqliteError {
@@ -20,9 +27,19 @@ impl std::convert::From<sqlx::Error> for SqliteError {
     }
 }
 
-pub fn sqlite_error_handler(err: sqlx::Error) {
-    match SqliteError::from(err) {
-        SqliteError::ItemAlreadyExists => println!("Item already exists"),
-        SqliteError::Unknown(code) => println!("Unknown error code: {}", code),
+pub fn sqlite_error_handler(
+    query_result: Result<SqliteQueryResult, sqlx::Error>,
+) -> Result<SqlResult, sqlx::Error> {
+    match query_result {
+        Ok(res) => Ok(SqlResult::QuerySuccess(res)),
+        Err(err) => match SqliteError::from(err) {
+            SqliteError::ItemAlreadyExists => Ok(SqlResult::AcceptableError(format!(
+                "Duplication: Item already exists"
+            ))),
+            SqliteError::Unknown(code) => Err(sqlx::Error::Io(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Error code: {}", code),
+            ))),
+        },
     }
 }

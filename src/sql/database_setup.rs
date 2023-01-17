@@ -1,13 +1,13 @@
 pub mod sql_setup {
 
-    use std::{fs};
+    use std::fs;
 
     // use futures::TyStreamExt;
     use crate::sql::{
         entities::structs::Item,
         queries::{find::fuzzy_find_single_item, insertion::insert_multiple_items},
     };
-    use sqlx::{sqlite::SqlitePoolOptions};
+    use sqlx::sqlite::SqlitePoolOptions;
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
     pub async fn initialize_db(path: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -27,7 +27,7 @@ pub mod sql_setup {
         let items: Vec<Item> = serde_json::from_str(&raw_string).expect("Error with json parse");
 
         println!("{:#?}", items);
-        insert_multiple_items(items, &pool).await?;
+        let _insert_res = insert_multiple_items(items, &pool).await;
 
         let thing = fuzzy_find_single_item("D20", &pool).await;
         let amp_item = thing.convert_from_row(&pool).await;
