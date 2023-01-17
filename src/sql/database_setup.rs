@@ -3,10 +3,7 @@ pub mod sql_setup {
     use std::fs;
 
     // use futures::TyStreamExt;
-    use crate::sql::{
-        entities::structs::Item,
-        queries::{find::fuzzy_find_single_item, insertion::insert_multiple_items},
-    };
+    use crate::sql::{entities::structs::Item, queries::insertions::insert_multiple_items};
     use sqlx::sqlite::SqlitePoolOptions;
     #[tokio::main]
     //Should change path from &str to Path or PathBuf
@@ -26,13 +23,13 @@ pub mod sql_setup {
 
         let items: Vec<Item> = serde_json::from_str(&raw_string).expect("Error with json parse");
 
-        println!("{:#?}", items);
-        let _insert_res = insert_multiple_items(items, &pool).await;
-
-        let thing = fuzzy_find_single_item("D20", &pool).await;
-        let amp_item = thing.convert_from_row(&pool).await;
-        let jsonb = serde_json::to_string_pretty(&amp_item).unwrap();
-        fs::write("./test_amp.json", jsonb);
+        // println!("{:#?}", items);
+        let insert_res = insert_multiple_items(items, &pool).await;
+        println!("{:#?}", insert_res);
+        // let thing = fuzzy_find_single_item("D20", &pool).await;
+        // let amp_item = thing.convert_from_row(&pool).await;
+        // let jsonb = serde_json::to_string_pretty(&amp_item).unwrap();
+        // fs::write("./test_amp.json", jsonb);
         // println!("{:#?}", jsonb);
 
         // let test = find_similar_item("D", path).await;
